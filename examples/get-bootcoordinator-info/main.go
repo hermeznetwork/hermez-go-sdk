@@ -22,4 +22,6 @@ func main() {
 		return
 	}
 	log.Printf("\nBoot Coordinator info is: %+v\n\n", nodeState)
+
+	log.Printf("\nBoot Coordinator URL is: %+v\n\n", nodeState.GetBootCoordinatorURL())
 }

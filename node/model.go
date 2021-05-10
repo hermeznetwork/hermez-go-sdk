@@ -12,6 +12,22 @@ type NodeState struct {
 	RecommendedFee    RecommendedFee    `json:"recommendedFee"`
 }
 
+// GetActualCoordinatorURL Get Actual Coordinator URL
+func (node *NodeState) GetActualCoordinatorURL() string {
+	if len(node.Network.NextForgers) < 1 {
+		return ""
+	}
+	return node.Network.NextForgers[0].Coordinator.URL
+}
+
+// GetBootCoordinatorURL Get Boot Coordinator URL
+func (node *NodeState) GetBootCoordinatorURL() string {
+	if len(node.Auction.BootCoordinatorURL) < 1 {
+		return ""
+	}
+	return node.Auction.BootCoordinatorURL
+}
+
 type Node struct {
 	ForgeDelay int `json:"forgeDelay"`
 	PoolLoad   int `json:"poolLoad"`
@@ -74,7 +90,7 @@ type Metrics struct {
 	TokenAccounts          int     `json:"tokenAccounts"`
 	Wallets                int     `json:"wallets"`
 	AvgTransactionFee      float64 `json:"avgTransactionFee"`
-	EstimatedTimeToForgeL1 int     `json:"estimatedTimeToForgeL1"`
+	EstimatedTimeToForgeL1 float64 `json:"estimatedTimeToForgeL1"`
 }
 
 type Buckets struct {
