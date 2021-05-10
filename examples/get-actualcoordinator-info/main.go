@@ -31,6 +31,8 @@ func main() {
 		return
 	}
 	log.Printf("Actual coordinator info is: %+v\n", actualCoordNodeState)
-	log.Printf("Actual coordinator URL is: %+v\n", actualCoordNodeState.GetActualCoordinatorURL())
-	log.Printf("Boot coordinator URL is: %+v\n", actualCoordNodeState.GetBootCoordinatorURL())
+	if len(actualCoordNodeState.Network.NextForgers) > 0 {
+		log.Printf("Actual coordinator URL is: %s\n", actualCoordNodeState.Network.NextForgers[0].Coordinator.URL)
+	}
+	log.Printf("Boot coordinator URL is: %+v\n", actualCoordNodeState.Auction.BootCoordinatorURL)
 }

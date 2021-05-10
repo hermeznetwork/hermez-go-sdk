@@ -5,10 +5,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/hermeznetwork/hermez-node/db/historydb"
 	"github.com/jeffprestes/hermez-go-sdk/client"
 )
 
-func GetActualCoordinatorNodeInfo(hezClient client.HermezClient) (nodeState NodeState, err error) {
+func GetActualCoordinatorNodeInfo(hezClient client.HermezClient) (nodeState historydb.StateAPI, err error) {
 	if len(hezClient.ActualCoordinatorURL) < 10 {
 		err = fmt.Errorf("[Node][GetActualCoordinatorNodeInfo] Actual Coordinator is not set : %s", hezClient.ActualCoordinatorURL)
 		return

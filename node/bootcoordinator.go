@@ -5,10 +5,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/hermeznetwork/hermez-node/db/historydb"
 	"github.com/jeffprestes/hermez-go-sdk/client"
 )
 
-func GetBootCoordinatorNodeInfo(hezClient client.HermezClient) (nodeState NodeState, err error) {
+func GetBootCoordinatorNodeInfo(hezClient client.HermezClient) (nodeState historydb.StateAPI, err error) {
 	if len(hezClient.BootCoordinatorURL) < 10 {
 		err = fmt.Errorf("[Node][GetBootCoordinatorNodeInfo] Boot Coordinator is not set : %s", hezClient.BootCoordinatorURL)
 		return
