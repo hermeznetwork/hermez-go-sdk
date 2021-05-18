@@ -1,6 +1,10 @@
 package account
 
-import "time"
+import (
+	"time"
+
+	"github.com/iden3/go-iden3-crypto/babyjub"
+)
 
 type AccountAPIResponse struct {
 	Accounts     []Account `json:"accounts"`
@@ -27,4 +31,12 @@ type Token struct {
 	ItemID           int       `json:"itemId"`
 	Name             string    `json:"name"`
 	Symbol           string    `json:"symbol"`
+}
+
+// BJJWallet BJJ Wallet
+type BJJWallet struct {
+	PrivateKey    babyjub.PrivateKey
+	PublicKey     babyjub.PublicKeyComp
+	HezBjjAddress string
+	HezEthAddress string
 }
