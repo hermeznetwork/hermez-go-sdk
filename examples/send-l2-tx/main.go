@@ -100,7 +100,7 @@ func main() {
 
 	apiTxBody, err := util.MarshallBody(apiTx)
 	if err != nil {
-		log.Printf("Error marshaling HTTP request tx: %+v - Error: %s\n", tx, err.Error())
+		log.Printf("Error marshaling HTTP request tx: %+v - Error: %s\n", apiTx, err.Error())
 		return
 	}
 
@@ -128,7 +128,7 @@ func main() {
 	if response.StatusCode < 200 || response.StatusCode > 299 {
 		tempBuf, err := io.ReadAll(response.Body)
 		if err != nil {
-			log.Printf("Error unmarshaling tx: %+v - Error: %s\n", tx, err.Error())
+			log.Printf("Error unmarshaling tx: %+v - Error: %s\n", apiTx, err.Error())
 			return
 		}
 		strJSONRequest := string(tempBuf)
