@@ -37,8 +37,10 @@ func NewHermezClient() (hezClient HermezClient, err error) {
 		return
 	}
 
+	hezClient.HttpClient = NewHttpClient()
+	bootCoordHttpClient := NewHttpClient()
 	hezClient.BootCoordinatorURL = bootCoordURL
-	hezClient.BootCoordinatorClient = sling.New().Base(bootCoordURL).Client(newHttpClient())
+	hezClient.BootCoordinatorClient = sling.New().Base(bootCoordURL).Client(&bootCoordHttpClient)
 	return
 }
 
@@ -55,7 +57,8 @@ func getCustomEthereumClient(URL string) (client *ethclient.Client, err error) {
 	return
 }
 
-func newHttpClient() *http.Client {
+// NewHttpClient generates new HTTP Client
+func NewHttpClient() http.Client {
 	tr := &http.Transport{
 		MaxIdleConns:       defaultMaxIdleConns,
 		IdleConnTimeout:    defaultIdleConnTimeout,
@@ -64,5 +67,5 @@ func newHttpClient() *http.Client {
 	httpClient := new(http.Client)
 	httpClient.Timeout = defaultTimeoutCall
 	httpClient.Transport = tr
-	return httpClient
+	return *httpClient
 }

@@ -1,6 +1,8 @@
 package client
 
 import (
+	"net/http"
+
 	"github.com/dghubble/sling"
 	"github.com/ethereum/go-ethereum/ethclient"
 	HermezAuctionProtocol "github.com/hermeznetwork/hermez-node/eth/contracts/auction"
@@ -10,6 +12,7 @@ import (
 type HermezClient struct {
 	EthClient               *ethclient.Client
 	AuctionContract         *HermezAuctionProtocol.HermezAuctionProtocol
+	HttpClient              http.Client
 	BootCoordinatorURL      string
 	BootCoordinatorClient   *sling.Sling
 	ActualCoordinatorURL    string
@@ -19,5 +22,6 @@ type HermezClient struct {
 // SetActualCoordinator updates coordinator definitions based on actual coordinator URL
 func (hezClient *HermezClient) SetActualCoordinator(URL string) {
 	hezClient.ActualCoordinatorURL = URL
-	hezClient.ActualCoordinatorClient = sling.New().Base(hezClient.ActualCoordinatorURL).Client(newHttpClient())
+	httpClient := NewHttpClient()
+	hezClient.ActualCoordinatorClient = sling.New().Base(hezClient.ActualCoordinatorURL).Client(&httpClient)
 }
