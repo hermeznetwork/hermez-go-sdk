@@ -45,6 +45,7 @@ func NewHermezAPITxRequest(poolTx *hezcommon.PoolL2Tx, token hezcommon.Token) AP
 
 // IdxToHez convert idx to hez idx
 func IdxToHez(idx hezcommon.Idx, tokenSymbol string) string {
+	// log.Printf("idx %+v\ntoken: %s\n", idx, tokenSymbol)
 	return "hez:" + tokenSymbol + ":" + strconv.Itoa(int(idx))
 }
 

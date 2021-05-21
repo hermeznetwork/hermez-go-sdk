@@ -1,17 +1,15 @@
 package main
 
 import (
-	"io"
-	"io/ioutil"
+	"fmt"
 	"log"
 	"math/big"
-	"net/http"
+	"strings"
 
 	"github.com/jeffprestes/hermez-go-sdk/account"
 	"github.com/jeffprestes/hermez-go-sdk/client"
 	"github.com/jeffprestes/hermez-go-sdk/node"
 	"github.com/jeffprestes/hermez-go-sdk/transaction"
-	"github.com/jeffprestes/hermez-go-sdk/util"
 )
 
 // SignatureConstantBytes contains the SignatureConstant in byte array
@@ -21,7 +19,7 @@ var SignatureConstantBytes = []byte{198, 11, 230, 15}
 
 func main() {
 	var debug bool
-	debug = true
+	debug = false
 
 	log.Println("Starting Hermez Client...")
 	hezClient, err := client.NewHermezClient()
@@ -61,15 +59,21 @@ func main() {
 	}
 
 	log.Println("Generating BJJ wallet...")
-	bjjWallet, _, err := account.CreateBjjWalletFromHexPvtKey("e7064c29eb71fa44e6a14e78f5fcba3c1625b6382d107ef21096555074a98cd9")
+	bjjWallet, ethAccount, err := account.CreateBjjWalletFromHexPvtKey("e7064c29eb71fa44e6a14e78f5fcba3c1625b6382d107ef21096555074a98cd9")
 	if err != nil {
 		log.Printf("Error Create a Babyjubjub Wallet from Hexdecimal Private Key. Account: %s - Error: %s\n", bjjWallet.HezEthAddress, err.Error())
 		return
 	}
 
-	senderAccDetails, err := account.GetAccountInfo(hezClient, bjjWallet.HezEthAddress)
+	senderAccDetails, err := account.GetAccountInfo(hezClient, ethAccount.Address.Hex())
 	if err != nil {
 		log.Printf("Error obtaining account details. Account: %s - Error: %s\n", bjjWallet.HezEthAddress, err.Error())
+		return
+	}
+
+	if strings.ToUpper(bjjWallet.HezBjjAddress) != strings.ToUpper(senderAccDetails.Accounts[0].BJJAddress) {
+		err = fmt.Errorf("Local BJJ address and remote BJJ account are different: %s %s", bjjWallet.HezBjjAddress, senderAccDetails.Accounts[0].BJJAddress)
+		log.Println(err)
 		return
 	}
 
@@ -88,7 +92,7 @@ func main() {
 
 	// Which token do you want to transfer?
 	itemToTransfer := "HEZ"
-	amount := big.NewInt(889000000000000000)
+	amount := big.NewInt(982000000000000000)
 	feeSelector := 126
 	chainID := 5 // goerli
 
@@ -98,53 +102,12 @@ func main() {
 		return
 	}
 
-	apiTxBody, err := util.MarshallBody(apiTx)
+	apiTx, response, err := transaction.ExecuteL2Transaction(hezClient, apiTx)
 	if err != nil {
-		log.Printf("Error marshaling HTTP request tx: %+v - Error: %s\n", apiTx, err.Error())
+		log.Printf("Error submiting tx transaction pool endpoint. Error: %s\n", err.Error())
 		return
 	}
 
-	var URL string
-	URL = hezClient.ActualCoordinatorURL + "/v1/transactions-pool"
-	request, err := http.NewRequest("POST", URL, apiTxBody)
-	if err != nil {
-		log.Printf("Error creating HTTP request. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
-		return
-	}
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:88.0) Gecko/20100101 Firefox/88.0")
-	request.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-	request.Header.Set("Accept-Encoding", "gzip, deflate, br")
-
-	log.Printf("Submiting this TX: %s\n Full Tx: %+v\nRequest details: %+v\n\n", apiTx.TxID, apiTx, request)
-
-	response, err := hezClient.HttpClient.Do(request)
-	if err != nil {
-		log.Printf("Error submitting HTTP request tx. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
-		return
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode < 200 || response.StatusCode > 299 {
-		tempBuf, err := io.ReadAll(response.Body)
-		if err != nil {
-			log.Printf("Error unmarshaling tx: %+v - Error: %s\n", apiTx, err.Error())
-			return
-		}
-		strJSONRequest := string(tempBuf)
-		log.Printf("Error posting TX. \nStatusCode:%d \nStatus: %s\nReturned Message: %s\nURL: %s \nRequest: %+v \nResponse: %+v\n", response.StatusCode, response.Status, strJSONRequest, URL, request, response)
-		return
-	}
-
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Printf("Error reading HTTP return from Coordinator. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
-		return
-	}
-	if b == nil || len(b) == 0 {
-		log.Printf("Error no HTTP return from Coordinator. URL: %s - request: %+v \n", URL, apiTxBody)
-		return
-	}
-
-	log.Printf("Transaction submitted: %s\n", string(b))
+	log.Println("Transaction ID: ", apiTx.TxID.String())
+	log.Printf("Transaction submitted: %s\n", response)
 }
