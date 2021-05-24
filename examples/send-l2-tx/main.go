@@ -10,11 +10,6 @@ import (
 	"github.com/jeffprestes/hermez-go-sdk/transaction"
 )
 
-// SignatureConstantBytes contains the SignatureConstant in byte array
-// format, which is equivalent to 3322668559 as uint32 in byte array in
-// big endian representation.
-var SignatureConstantBytes = []byte{198, 11, 230, 15}
-
 const (
 	nodeURL         = "http://marcelonode.xyz:8545"
 	sourceAccPvtKey = ""
