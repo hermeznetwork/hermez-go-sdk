@@ -12,7 +12,7 @@ import (
 
 // GetAccountInfo connects to a hermez node and pull account data
 func GetAccountInfo(hezClient client.HermezClient, account string) (hezAccount AccountAPIResponse, err error) {
-	log.Println("[Account][GetAccountInfo] Pulling account info from a coordinator...")
+	log.Println("[Account][GetAccountInfo] Pulling account info ", account, " from a coordinator...")
 	if len(account) < 5 {
 		err = fmt.Errorf("[Account][GetAccountInfo] Invalid account to query: %s", account)
 		return

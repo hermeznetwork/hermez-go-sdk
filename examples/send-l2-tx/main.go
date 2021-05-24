@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"math/big"
-	"os"
 
 	"github.com/jeffprestes/hermez-go-sdk/account"
 	"github.com/jeffprestes/hermez-go-sdk/client"
@@ -16,12 +15,17 @@ import (
 // big endian representation.
 var SignatureConstantBytes = []byte{198, 11, 230, 15}
 
+const (
+	nodeURL         = "http://marcelonode.xyz:8545"
+	sourceAccPvtKey = ""
+)
+
 func main() {
 	var debug bool
 	debug = false
 
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient()
+	hezClient, err := client.NewHermezClient(nodeURL)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return
@@ -58,7 +62,7 @@ func main() {
 	}
 
 	log.Println("Generating BJJ wallet...")
-	bjjWallet, _, err := account.CreateBjjWalletFromHexPvtKey(os.Getenv("HERMEZ_SDK_PVTKEY"))
+	bjjWallet, _, err := account.CreateBjjWalletFromHexPvtKey(sourceAccPvtKey)
 	if err != nil {
 		log.Printf("Error Create a Babyjubjub Wallet from Hexdecimal Private Key. Account: %s - Error: %s\n", bjjWallet.EthAccount.Address.Hex(), err.Error())
 		return
