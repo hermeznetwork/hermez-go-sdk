@@ -3,6 +3,7 @@ package account
 import (
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 )
 
@@ -38,5 +39,6 @@ type BJJWallet struct {
 	PrivateKey    babyjub.PrivateKey
 	PublicKey     babyjub.PublicKeyComp
 	HezBjjAddress string
+	EthAccount    accounts.Account
 	HezEthAddress string
 }

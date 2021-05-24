@@ -63,6 +63,7 @@ func CreateBjjWalletFromHexPvtKey(hexPvtKey string) (bjjWallet BJJWallet, ethAcc
 	bjjWallet.PrivateKey = bjjPvtKey
 	bjjWallet.PublicKey = bjjPubKeyCompressed
 	bjjWallet.HezBjjAddress = bjjAddress
+	bjjWallet.EthAccount = ethAccount
 	bjjWallet.HezEthAddress = "hez:" + ethAccount.Address.Hex()
 
 	return
