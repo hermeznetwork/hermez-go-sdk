@@ -17,8 +17,8 @@ const (
 	defaultTimeoutCall     = 2 * time.Minute
 )
 
-func NewHermezClient() (hezClient HermezClient, err error) {
-	ethClient, err := getCustomEthereumClient("http://191.252.179.69:8545")
+func NewHermezClient(nodeURL string) (hezClient HermezClient, err error) {
+	ethClient, err := getCustomEthereumClient(nodeURL)
 	if err != nil {
 		log.Printf("Error during ETH client initialization: %s\n", err.Error())
 		return

@@ -7,9 +7,13 @@ import (
 	"github.com/jeffprestes/hermez-go-sdk/client"
 )
 
+const (
+	nodeURL = "http://marcelonode.xyz:8545"
+)
+
 func main() {
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient()
+	hezClient, err := client.NewHermezClient(nodeURL)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return
