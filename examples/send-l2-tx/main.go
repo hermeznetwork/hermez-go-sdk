@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	nodeURL         = "http://marcelonode.xyz:8545"
-	sourceAccPvtKey = ""
+	nodeURL                   = "https://geth.marcelonode.xyz"
+	sourceAccPvtKey           = ""
+	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 	debug = false
 
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient(nodeURL)
+	hezClient, err := client.NewHermezClient(nodeURL, auctionContractAddressHex)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return
@@ -67,7 +68,7 @@ func main() {
 		bjjWallet,
 		"0x263C3Ab7E4832eDF623fBdD66ACee71c028Ff591",
 		"HEZ",
-		big.NewInt(982000000000000000),
+		big.NewInt(983000000000000000),
 		126,
 		5)
 

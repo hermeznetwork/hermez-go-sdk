@@ -92,7 +92,7 @@ func MarshalTransaction(itemToTransfer string,
 		if strings.ToUpper(account.Token.Symbol) == itemToTransfer {
 			token.TokenID = hezcommon.TokenID(account.Token.ID)
 			token.Symbol = account.Token.Symbol
-			nonce = hezcommon.Nonce(account.Nonce + 1)
+			nonce = hezcommon.Nonce(account.Nonce)
 			tempAccountsIdx := strings.Split(account.AccountIndex, ":")
 			if len(tempAccountsIdx) == 3 {
 				tempAccIdx, errAtoi := strconv.Atoi(tempAccountsIdx[2])
