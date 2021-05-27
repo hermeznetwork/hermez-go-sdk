@@ -17,14 +17,14 @@ const (
 	defaultTimeoutCall     = 2 * time.Minute
 )
 
-func NewHermezClient(nodeURL string) (hezClient HermezClient, err error) {
+func NewHermezClient(nodeURL string, auctionContractAddressHex string) (hezClient HermezClient, err error) {
 	ethClient, err := getCustomEthereumClient(nodeURL)
 	if err != nil {
 		log.Printf("Error during ETH client initialization: %s\n", err.Error())
 		return
 	}
 	hezClient.EthClient = ethClient
-	auctionContractAddress := common.HexToAddress("0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20")
+	auctionContractAddress := common.HexToAddress(auctionContractAddressHex)
 	auctionContract, err := HermezAuctionProtocol.NewHermezAuctionProtocol(auctionContractAddress, hezClient.EthClient)
 	if err != nil {
 		log.Printf("Error during Auction smart contract wrapper initialization: %s\n", err.Error())
