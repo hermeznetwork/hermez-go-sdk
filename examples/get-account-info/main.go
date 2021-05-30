@@ -8,13 +8,13 @@ import (
 )
 
 const (
-	nodeURL                   = "http://geth.marcelonode.xyz:8545"
+	ethereumNodeURL           = "http://geth.marcelonode.xyz:8545"
 	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
 )
 
 func main() {
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient(nodeURL, auctionContractAddressHex)
+	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return
