@@ -12,7 +12,7 @@ import (
 
 const (
 	ethereumNodeURL           = "https://geth.marcelonode.xyz"
-	sourceAccPvtKey           = "4c1bd8f172421406e7ad78098e61c3988bf596fee6e40aa5802bf863f1c7528e"
+	sourceAccPvtKey           = ""
 	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
 )
 

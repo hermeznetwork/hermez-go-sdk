@@ -11,8 +11,8 @@ import (
 )
 
 // PostNewBJJAccount post new BJJ Account to Hermez Network to allow L2 - Layer 2 transactions
-// func PostNewBJJAccount(newBjjAccount BJJWallet, hezClient client.HermezClient) (err error) {
-// 	log.Println("[Account][PostNewBJJAccount] Posting new account ", newBjjAccount.HezBjjAddress, " to ", hezClient.ActualCoordinatorURL, " coordinator... ")
+// func PostNewBJJAccount(newBjj BJJWallet, hezClient client.HermezClient) (err error) {
+// 	log.Println("[Account][PostNewBJJAccount] Posting new account ", newBjj.HezBjjAddress, " to ", hezClient.ActualCoordinatorURL, " coordinator... ")
 
 // 	URL := hezClient.ActualCoordinatorURL + "/v1/account-creation-authorization"
 // 	request, err := http.NewRequest("POST", URL, apiTxBody)
