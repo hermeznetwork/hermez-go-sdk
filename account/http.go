@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/jeffprestes/hermez-go-sdk/client"
+	"github.com/hermeznetwork/hermez-go-sdk/client"
 )
 
 // PostNewBJJAccount post new BJJ Account to Hermez Network to allow L2 - Layer 2 transactions
