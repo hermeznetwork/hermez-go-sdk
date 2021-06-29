@@ -1,4 +1,4 @@
-module github.com/jeffprestes/hermez-go-sdk
+module github.com/hermeznetwork/hermez-go-sdk
 
 go 1.16
 
