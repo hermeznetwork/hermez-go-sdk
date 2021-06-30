@@ -97,7 +97,7 @@ func MarshalTransaction(itemToTransfer string,
 			if len(tempAccountsIdx) == 3 {
 				tempAccIdx, errAtoi := strconv.Atoi(tempAccountsIdx[2])
 				if errAtoi != nil {
-					err = fmt.Errorf("[MarshalTransaction] Error getting sender innerAccount index. Account: %+v - Error: %s\n", innerAccount, err.Error())
+					err = fmt.Errorf("[MarshalTransaction] Error getting sender Account index. Account: %+v - Error: %s\n", innerAccount, err.Error())
 					return
 				}
 				fromIdx = hezcommon.Idx(tempAccIdx)
@@ -112,7 +112,7 @@ func MarshalTransaction(itemToTransfer string,
 			if len(tempAccountsIdx) == 3 {
 				tempAccIdx, errAtoi := strconv.Atoi(tempAccountsIdx[2])
 				if errAtoi != nil {
-					log.Printf("[MarshalTransaction] Error getting receipient innerAccount index. Account: %+v - Error: %s\n", innerAccount, err.Error())
+					log.Printf("[MarshalTransaction] Error getting receipient Account index. Account: %+v - Error: %s\n", innerAccount, err.Error())
 					return
 				}
 				toIdx = hezcommon.Idx(tempAccIdx)
@@ -122,14 +122,14 @@ func MarshalTransaction(itemToTransfer string,
 
 	// If there is no innerAccount created to this specific token stop the code
 	if len(fromIdx.String()) < 1 {
-		err = fmt.Errorf("[MarshalTransaction] There is no sender innerAccount to this user %s for this Token %s", senderBjjWallet.HezBjjAddress, itemToTransfer)
+		err = fmt.Errorf("[MarshalTransaction] There is no sender Account to this user %s for this Token %s", senderBjjWallet.HezBjjAddress, itemToTransfer)
 		log.Println(err.Error())
 		return
 	}
 
 	// If there is no innerAccount created to this specific token stop the code
 	if len(toIdx.String()) < 1 {
-		err = fmt.Errorf("[MarshalTransaction] There is no receipient innerAccount to this user %+v for this Token %s", receipientAcctDetails, itemToTransfer)
+		err = fmt.Errorf("[MarshalTransaction] There is no receipient Account to this user %+v for this Token %s", receipientAcctDetails, itemToTransfer)
 		log.Println(err.Error())
 		return
 	}
