@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/jeffprestes/hermez-go-sdk/client"
-	"github.com/jeffprestes/hermez-go-sdk/util"
+	"github.com/hermeznetwork/hermez-go-sdk/client"
+	"github.com/hermeznetwork/hermez-go-sdk/util"
 )
 
 // ExecuteL2Transaction submits L2 transaction to the actual coordinator endpoint

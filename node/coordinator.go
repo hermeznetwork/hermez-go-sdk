@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/hermeznetwork/hermez-go-sdk/client"
 	"github.com/hermeznetwork/hermez-node/db/historydb"
-	"github.com/jeffprestes/hermez-go-sdk/client"
 )
 
 func GetActualCoordinatorNodeInfo(hezClient client.HermezClient) (nodeState historydb.StateAPI, err error) {
