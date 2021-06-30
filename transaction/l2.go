@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/jeffprestes/hermez-go-sdk/account"
-	"github.com/jeffprestes/hermez-go-sdk/client"
+	"github.com/hermeznetwork/hermez-go-sdk/account"
+	"github.com/hermeznetwork/hermez-go-sdk/client"
 )
 
 // L2Transfer perform token or ETH transfer within Hermez network (we say L2 or Layer2)

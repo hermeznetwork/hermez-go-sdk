@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/jeffprestes/hermez-go-sdk/client"
-	"github.com/jeffprestes/hermez-go-sdk/node"
+	"github.com/hermeznetwork/hermez-go-sdk/client"
+	"github.com/hermeznetwork/hermez-go-sdk/node"
 )
 
 const (

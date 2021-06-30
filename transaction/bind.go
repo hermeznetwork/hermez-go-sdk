@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/hermeznetwork/hermez-go-sdk/account"
 	hezcommon "github.com/hermeznetwork/hermez-node/common"
 	"github.com/iden3/go-iden3-crypto/babyjub"
-	"github.com/jeffprestes/hermez-go-sdk/account"
 )
 
 // NewHermezAPITxRequest convert L2 tx to Hermez API request model
@@ -87,17 +87,17 @@ func MarshalTransaction(itemToTransfer string,
 	var nonce hezcommon.Nonce
 	var fromIdx, toIdx hezcommon.Idx
 
-	// Get from account Token and nonce details from sender account
-	for _, account := range senderAcctDetails.Accounts {
-		if strings.ToUpper(account.Token.Symbol) == itemToTransfer {
-			token.TokenID = hezcommon.TokenID(account.Token.ID)
-			token.Symbol = account.Token.Symbol
-			nonce = hezcommon.Nonce(account.Nonce)
-			tempAccountsIdx := strings.Split(account.AccountIndex, ":")
+	// Get from innerAccount Token and nonce details from sender innerAccount
+	for _, innerAccount := range senderAcctDetails.Accounts {
+		if strings.ToUpper(innerAccount.Token.Symbol) == itemToTransfer {
+			token.TokenID = hezcommon.TokenID(innerAccount.Token.ID)
+			token.Symbol = innerAccount.Token.Symbol
+			nonce = hezcommon.Nonce(innerAccount.Nonce)
+			tempAccountsIdx := strings.Split(innerAccount.AccountIndex, ":")
 			if len(tempAccountsIdx) == 3 {
 				tempAccIdx, errAtoi := strconv.Atoi(tempAccountsIdx[2])
 				if errAtoi != nil {
-					err = fmt.Errorf("[MarshalTransaction] Error getting sender account index. Account: %+v - Error: %s\n", account, err.Error())
+					err = fmt.Errorf("[MarshalTransaction] Error getting sender innerAccount index. Account: %+v - Error: %s\n", innerAccount, err.Error())
 					return
 				}
 				fromIdx = hezcommon.Idx(tempAccIdx)
@@ -105,14 +105,14 @@ func MarshalTransaction(itemToTransfer string,
 		}
 	}
 
-	// Get from account Token and nonce details from receipient account
-	for _, account := range receipientAcctDetails.Accounts {
-		if strings.ToUpper(account.Token.Symbol) == itemToTransfer {
-			tempAccountsIdx := strings.Split(account.AccountIndex, ":")
+	// Get from innerAccount Token and nonce details from receipient innerAccount
+	for _, innerAccount := range receipientAcctDetails.Accounts {
+		if strings.ToUpper(innerAccount.Token.Symbol) == itemToTransfer {
+			tempAccountsIdx := strings.Split(innerAccount.AccountIndex, ":")
 			if len(tempAccountsIdx) == 3 {
 				tempAccIdx, errAtoi := strconv.Atoi(tempAccountsIdx[2])
 				if errAtoi != nil {
-					log.Printf("[MarshalTransaction] Error getting receipient account index. Account: %+v - Error: %s\n", account, err.Error())
+					log.Printf("[MarshalTransaction] Error getting receipient innerAccount index. Account: %+v - Error: %s\n", innerAccount, err.Error())
 					return
 				}
 				toIdx = hezcommon.Idx(tempAccIdx)
@@ -120,16 +120,16 @@ func MarshalTransaction(itemToTransfer string,
 		}
 	}
 
-	// If there is no account created to this specific token stop the code
+	// If there is no innerAccount created to this specific token stop the code
 	if len(fromIdx.String()) < 1 {
-		err = fmt.Errorf("[MarshalTransaction] There is no sender account to this user %s for this Token %s", senderBjjWallet.HezBjjAddress, itemToTransfer)
+		err = fmt.Errorf("[MarshalTransaction] There is no sender innerAccount to this user %s for this Token %s", senderBjjWallet.HezBjjAddress, itemToTransfer)
 		log.Println(err.Error())
 		return
 	}
 
-	// If there is no account created to this specific token stop the code
+	// If there is no innerAccount created to this specific token stop the code
 	if len(toIdx.String()) < 1 {
-		err = fmt.Errorf("[MarshalTransaction] There is no receipient account to this user %+v for this Token %s", receipientAcctDetails, itemToTransfer)
+		err = fmt.Errorf("[MarshalTransaction] There is no receipient innerAccount to this user %+v for this Token %s", receipientAcctDetails, itemToTransfer)
 		log.Println(err.Error())
 		return
 	}

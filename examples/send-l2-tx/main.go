@@ -4,10 +4,10 @@ import (
 	"log"
 	"math/big"
 
-	"github.com/jeffprestes/hermez-go-sdk/account"
-	"github.com/jeffprestes/hermez-go-sdk/client"
-	"github.com/jeffprestes/hermez-go-sdk/node"
-	"github.com/jeffprestes/hermez-go-sdk/transaction"
+	"github.com/hermeznetwork/hermez-go-sdk/account"
+	"github.com/hermeznetwork/hermez-go-sdk/client"
+	"github.com/hermeznetwork/hermez-go-sdk/node"
+	"github.com/hermeznetwork/hermez-go-sdk/transaction"
 )
 
 const (
