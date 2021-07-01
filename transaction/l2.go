@@ -11,7 +11,7 @@ import (
 // L2Transfer perform token or ETH transfer within Hermez network (we say L2 or Layer2)
 func L2Transfer(hezClient client.HermezClient,
 	senderBjjWallet account.BJJWallet,
-	receipientAddress string,
+	recipientAddress string,
 	tokenSymbolToTransfer string,
 	amount *big.Int,
 	feeRangeSelectedID int,
@@ -20,7 +20,7 @@ func L2Transfer(hezClient client.HermezClient,
 	// log.Println("[L2Transfer] Parameters")
 	// log.Printf("hezClient: %+v\n", hezClient)
 	// log.Printf("senderBjjWallet: %+v", senderBjjWallet)
-	// log.Println("receipientAddress: ", receipientAddress)
+	// log.Println("recipientAddress: ", recipientAddress)
 	// log.Println("tokenSymbolToTransfer: ", tokenSymbolToTransfer)
 	// log.Println("amount: ", amount.String())
 	// log.Println("feeRangeSelectedID: ", feeRangeSelectedID)
@@ -39,9 +39,9 @@ func L2Transfer(hezClient client.HermezClient,
 	// log.Println("BJJ Address local: ", bjjWallet.HezBjjAddress)
 	// log.Printf("Wallet details %+v\n", bjjWallet)
 
-	recipientAccDetails, err := account.GetAccountInfo(hezClient, receipientAddress)
+	recipientAccDetails, err := account.GetAccountInfo(hezClient, recipientAddress)
 	if err != nil {
-		err = fmt.Errorf("[L2Transfer] Error obtaining account details. Account: %s - Error: %s\n", senderBjjWallet.HezEthAddress, err.Error())
+		err = fmt.Errorf("[L2Transfer] Error obtaining account details. Account: %s - Error: %s\n", recipientAddress, err.Error())
 		return
 	}
 
