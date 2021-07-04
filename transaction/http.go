@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/hermeznetwork/hermez-go-sdk/client"
 	"github.com/hermeznetwork/hermez-go-sdk/util"
+	"github.com/hermeznetwork/hermez-node/api"
 )
 
 // ExecuteL2Transaction submits L2 transaction to the actual coordinator endpoint
@@ -63,7 +64,7 @@ func ExecuteL2Transaction(hezClient client.HermezClient, apiTx APITx) (apiTxRetu
 }
 
 // ExecuteAtomicTransaction submits Atomic transaction to the actual coordinator endpoint
-func ExecuteAtomicTransaction(hezClient client.HermezClient, atomicTxs *AtomicGroup) (serverResponse string, err error) {
+func ExecuteAtomicTransaction(hezClient client.HermezClient, atomicTxs api.AtomicGroup) (serverResponse string, err error) {
 	apiTxBody, err := util.MarshallBody(atomicTxs)
 	if err != nil {
 		err = fmt.Errorf("[ExecuteAtomicTransaction] Error marshaling HTTP request tx: %+v - Error: %s\n", atomicTxs, err.Error())
@@ -71,7 +72,8 @@ func ExecuteAtomicTransaction(hezClient client.HermezClient, atomicTxs *AtomicGr
 	}
 
 	var URL string
-	URL = hezClient.ActualCoordinatorURL + "/v1/atomic-pool"
+	//URL = hezClient.ActualCoordinatorURL + "/v1/atomic-pool"
+	URL = "https://marcelonode.xyz/v1/atomic-pool"
 	request, err := http.NewRequest("POST", URL, apiTxBody)
 	if err != nil {
 		err = fmt.Errorf("[ExecuteAtomicTransaction] Error creating HTTP request. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
@@ -107,6 +109,6 @@ func ExecuteAtomicTransaction(hezClient client.HermezClient, atomicTxs *AtomicGr
 		return
 	}
 
-	serverResponse = fmt.Sprintln("Transaction ID submmited: ", atomicTxs.AtomicGroupId.String(), "Message returned in Hex: %s\n", common.Bytes2Hex(b))
+	serverResponse = fmt.Sprintln("Transaction ID submmited: ", atomicTxs.ID.String(), "Message returned in Hex: %s\n", common.Bytes2Hex(b))
 	return
 }

@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	ethereumNodeURL           = "https://geth.marcelonode.xyz"
+	ethereumNodeURL           = "https://goerli.infura.io/v3/171aba97e221493db75f0c9900902580"
 	sourceAccPvtKey1          = ""
 	sourceAccPvtKey2          = ""
 	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
@@ -72,7 +72,6 @@ func main() {
 		Amount:                big.NewInt(10),
 		FeeRangeSelectedID:    0,
 		RqOffSet:              1,
-		EthereumChainID:       5,
 	}
 
 	log.Println("Generating BJJ wallet 2...")
@@ -88,14 +87,13 @@ func main() {
 		Amount:                big.NewInt(10),
 		FeeRangeSelectedID:    0,
 		RqOffSet:              7,
-		EthereumChainID:       5,
 	}
 
 	txs := make([]transaction.AtomicTxItem, 2)
 	txs[0] = tx1
 	txs[1] = tx2
 
-	server, err := transaction.AtomicTransfer(hezClient, txs)
+	server, err := transaction.AtomicTransfer(hezClient, 5, txs)
 	if err != nil {
 		log.Printf(err.Error())
 	} else {

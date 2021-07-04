@@ -2,14 +2,16 @@ package transaction
 
 import (
 	"fmt"
-	hezcommon "github.com/hermeznetwork/hermez-node/common"
-	"log"
 	"math/big"
 	"strconv"
 	"strings"
 
 	"github.com/hermeznetwork/hermez-go-sdk/account"
 	"github.com/hermeznetwork/hermez-go-sdk/client"
+	"github.com/hermeznetwork/hermez-node/api"
+
+	ethCommon "github.com/ethereum/go-ethereum/common"
+	hezcommon "github.com/hermeznetwork/hermez-node/common"
 )
 
 type AtomicTxItem struct {
@@ -19,141 +21,122 @@ type AtomicTxItem struct {
 	Amount                *big.Int
 	FeeRangeSelectedID    int
 	RqOffSet              int
-	EthereumChainID       int
+}
+
+func getAccountDetails(hezClient client.HermezClient, address string,
+	tokenToTransfer string) (idx hezcommon.Idx, nonce hezcommon.Nonce, tokenId hezcommon.TokenID, err error) {
+	var accDetails account.AccountAPIResponse
+	accDetails, err = account.GetAccountInfo(hezClient, address)
+	if err != nil {
+		err = fmt.Errorf("error obtaining account details. Account: %s - Error: %s\n", address, err.Error())
+		return
+	}
+	for _, innerAccount := range accDetails.Accounts {
+		if strings.ToUpper(innerAccount.Token.Symbol) == tokenToTransfer {
+			tokenId = hezcommon.TokenID(innerAccount.Token.ID)
+			nonce = hezcommon.Nonce(innerAccount.Nonce)
+			tempAccountsIdx := strings.Split(innerAccount.AccountIndex, ":")
+			if len(tempAccountsIdx) == 3 {
+				var tempAccIdx int
+				tempAccIdx, err = strconv.Atoi(tempAccountsIdx[2])
+				if err != nil {
+					err = fmt.Errorf("error getting account index. Account: %+v - Error: %s\n", innerAccount, err.Error())
+					return
+				}
+				idx = hezcommon.Idx(tempAccIdx)
+			}
+		}
+	}
+	if len(string(idx)) < 1 {
+		err = fmt.Errorf("there is no account to this user %s for this Token %s", address, tokenToTransfer)
+		return
+	}
+	return
 }
 
 // AtomicTransfer perform token or ETH transfers in a pool of transactions
-func AtomicTransfer(hezClient client.HermezClient,
+func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 	txs []AtomicTxItem) (serverResponse string, err error) {
-	atomicGroup := new(AtomicGroup)
+	atomicGroup := api.AtomicGroup{}
 
 	// configure transactions and do basic validations
-	for i, currentAtomicTxItem := range txs {
-		atx := new(AtomicTx)
-		atx.Type = string(hezcommon.TxTypeTransfer)
-		atx.Amount = currentAtomicTxItem.Amount.String()
-		atx.Fee = uint64(hezcommon.FeeSelector(uint8(currentAtomicTxItem.FeeRangeSelectedID)))
-		atx.ToBJJ = hezcommon.EmptyBJJComp.String()
-		atx.ToEthAddr = hezcommon.EmptyAddr.String()
-		atx.RqOffSet = currentAtomicTxItem.RqOffSet
-
-		localTx := new(hezcommon.PoolL2Tx)
-		localTx.ToEthAddr = hezcommon.EmptyAddr
+	for _, currentAtomicTxItem := range txs {
+		localTx := hezcommon.PoolL2Tx{}
+		localTx.ToEthAddr = ethCommon.HexToAddress(currentAtomicTxItem.RecipientAddress)
 		localTx.ToBJJ = hezcommon.EmptyBJJComp
 		localTx.Amount = currentAtomicTxItem.Amount
 		localTx.Type = hezcommon.TxTypeTransfer
 		localTx.Fee = hezcommon.FeeSelector(uint8(currentAtomicTxItem.FeeRangeSelectedID))
+		localTx.TokenSymbol = currentAtomicTxItem.TokenSymbolToTransfer
 
 		// SenderAccount
-		senderAccDetails, err2 := account.GetAccountInfo(hezClient, currentAtomicTxItem.SenderBjjWallet.EthAccount.Address.Hex())
-		if err2 != nil {
-			err = fmt.Errorf("[AtomicTransfer] Error obtaining account details. Account: %s - Error: %s\n", currentAtomicTxItem.SenderBjjWallet.HezEthAddress, err.Error())
+		var idx hezcommon.Idx
+		var nonce hezcommon.Nonce
+		var tokenId hezcommon.TokenID
+		idx, nonce, tokenId, err = getAccountDetails(hezClient, currentAtomicTxItem.SenderBjjWallet.EthAccount.Address.Hex(), currentAtomicTxItem.TokenSymbolToTransfer)
+		if err != nil {
+			err = fmt.Errorf("[AtomicTransfer] Error obtaining sender account details. Account: %s - Error: %s\n", currentAtomicTxItem.SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
 			return
 		}
-		for _, innerAccount := range senderAccDetails.Accounts {
-			if strings.ToUpper(innerAccount.Token.Symbol) == currentAtomicTxItem.TokenSymbolToTransfer {
-				localTx.TokenID = hezcommon.TokenID(innerAccount.Token.ID)
-				atx.TokenID = uint32(hezcommon.TokenID(innerAccount.Token.ID))
-				localTx.Nonce = hezcommon.Nonce(innerAccount.Nonce)
-				atx.Nonce = uint64(hezcommon.Nonce(innerAccount.Nonce))
-				tempAccountsIdx := strings.Split(innerAccount.AccountIndex, ":")
-				if len(tempAccountsIdx) == 3 {
-					tempAccIdx, errAtoi := strconv.Atoi(tempAccountsIdx[2])
-					if errAtoi != nil {
-						err = fmt.Errorf("[AtomicTransfer] Error getting sender Account index. Account: %+v - Error: %s\n", innerAccount, err.Error())
-						return
-					}
-					localTx.FromIdx = hezcommon.Idx(tempAccIdx)
-					atx.FromIdx = string(hezcommon.Idx(tempAccIdx))
-				}
-			}
-		}
-		if len(atx.FromIdx) < 1 {
-			err = fmt.Errorf("[AtomicTransfer] There is no sender Account to this user %s for this Token %s", currentAtomicTxItem.SenderBjjWallet.HezBjjAddress, currentAtomicTxItem.TokenSymbolToTransfer)
-			log.Println(err.Error())
-			return
-		}
+		localTx.TokenID = tokenId
+		localTx.Nonce = nonce
+		localTx.FromIdx = idx
 
 		// Recipient Account
-		recipientAccDetails, err3 := account.GetAccountInfo(hezClient, currentAtomicTxItem.RecipientAddress)
-		if err3 != nil {
-			err = fmt.Errorf("[AtomicTransfer] Error obtaining account details. Account: %s - Error: %s\n", currentAtomicTxItem.RecipientAddress, err.Error())
+		idx, _, _, err = getAccountDetails(hezClient, currentAtomicTxItem.RecipientAddress, currentAtomicTxItem.TokenSymbolToTransfer)
+		if err != nil {
+			err = fmt.Errorf("[AtomicTransfer] Error obtaining receipient account details. Account: %s - Error: %s\n", currentAtomicTxItem.SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
 			return
 		}
-		for _, innerAccount := range recipientAccDetails.Accounts {
-			if strings.ToUpper(innerAccount.Token.Symbol) == currentAtomicTxItem.TokenSymbolToTransfer {
-				tempAccountsIdx := strings.Split(innerAccount.AccountIndex, ":")
-				if len(tempAccountsIdx) == 3 {
-					tempAccIdx, errAtoi := strconv.Atoi(tempAccountsIdx[2])
-					if errAtoi != nil {
-						log.Printf("[AtomicTransfer] Error getting receipient Account index. Account: %+v - Error: %s\n", innerAccount, err.Error())
-						return
-					}
-					localTx.ToIdx = hezcommon.Idx(tempAccIdx)
-					atx.ToIdx = string(hezcommon.Idx(tempAccIdx))
-				}
-			}
-		}
-		if len(atx.ToIdx) < 1 {
-			err = fmt.Errorf("[AtomicTransfer] There is no receipient Account to this user %+v for this Token %s", recipientAccDetails, currentAtomicTxItem.TokenSymbolToTransfer)
-			log.Println(err.Error())
+		localTx.ToIdx = idx
+		err = localTx.SetID()
+		if err != nil {
 			return
 		}
 
-		// Signature
-		htx, err4 := hezcommon.NewPoolL2Tx(localTx)
-		if err4 != nil {
-			err = fmt.Errorf("[AtomicTransfer] Error creating L2 TX Pool object. TX: %+v - Error: %s\n", currentAtomicTxItem, err.Error())
-			return
+		atomicGroup.Txs = append(atomicGroup.Txs, localTx)
+	}
+
+	// Populate RqID and set the RqFields
+	for current, currentAtomicTxItem := range txs {
+		position := 0
+		if currentAtomicTxItem.RqOffSet > 0 && currentAtomicTxItem.RqOffSet < 4 {
+			position = current + currentAtomicTxItem.RqOffSet
+		} else {
+			switch currentAtomicTxItem.RqOffSet {
+			case 4:
+				position = current - 4
+			case 5:
+				position = current - 3
+			case 6:
+				position = current - 2
+			case 7:
+				position = current - 1
+			}
 		}
-		txHash, err5 := htx.HashToSign(uint16(currentAtomicTxItem.EthereumChainID))
-		if err5 != nil {
-			err = fmt.Errorf("[AtomicTransfer] Error generating currentAtomicTxItem hash. TX: %+v - Error: %s\n", currentAtomicTxItem, err.Error())
+		atomicGroup.Txs[current].RqFromIdx = atomicGroup.Txs[position].FromIdx
+		atomicGroup.Txs[current].RqToIdx = atomicGroup.Txs[position].ToIdx
+		atomicGroup.Txs[current].RqToEthAddr = atomicGroup.Txs[position].ToEthAddr
+		atomicGroup.Txs[current].RqToBJJ = atomicGroup.Txs[position].ToBJJ
+		atomicGroup.Txs[current].RqNonce = atomicGroup.Txs[position].Nonce
+		atomicGroup.Txs[current].RqFee = atomicGroup.Txs[position].Fee
+		atomicGroup.Txs[current].RqAmount = atomicGroup.Txs[position].Amount
+		atomicGroup.Txs[current].RqOffset = uint8(currentAtomicTxItem.RqOffSet)
+	}
+
+	// Generate atomic group id
+	atomicGroup.SetAtomicGroupID()
+
+	// Sign the txs
+	for current, currentAtomicTxItem := range txs {
+		var txHash *big.Int
+		txHash, err = atomicGroup.Txs[current].HashToSign(uint16(ethereumChainID))
+		if err != nil {
+			err = fmt.Errorf("[AtomicTransfer] Error generating currentAtomicTxItem hash. TX: %+v - Error: %s\n", atomicGroup.Txs[current], err.Error())
 			return
 		}
 		signedTx := currentAtomicTxItem.SenderBjjWallet.PrivateKey.SignPoseidon(txHash)
-		atx.Signature = signedTx.Compress().String()
-
-		// Idx
-		atx.TxID = htx.TxID
-		if i == 0 {
-			atomicGroup.AtomicGroupId = atx.TxID
-		}
-
-		// Populate array
-		atomicGroup.AddAtomicItem(AtomicTx{
-			TxID:      atx.TxID,
-			Type:      atx.Type,
-			TokenID:   atx.TokenID,
-			FromIdx:   atx.FromIdx,
-			ToIdx:     atx.ToIdx,
-			ToEthAddr: atx.ToEthAddr,
-			ToBJJ:     atx.ToBJJ,
-			Amount:    atx.Amount,
-			Fee:       atx.Fee,
-			Nonce:     atx.Nonce,
-			Signature: atx.Signature,
-			RqID:      atx.RqID,
-			RqOffSet:  atx.RqOffSet,
-		})
-	}
-
-	// Populate RqID
-	for current, tx := range atomicGroup.Txs {
-		if tx.RqOffSet > 0 && tx.RqOffSet < 4 {
-			atomicGroup.Txs[current].RqID = atomicGroup.Txs[current+tx.RqOffSet].TxID
-		} else {
-			switch tx.RqOffSet {
-			case 4:
-				atomicGroup.Txs[current].RqID = atomicGroup.Txs[current-4].TxID
-			case 5:
-				atomicGroup.Txs[current].RqID = atomicGroup.Txs[current-3].TxID
-			case 6:
-				atomicGroup.Txs[current].RqID = atomicGroup.Txs[current-2].TxID
-			case 7:
-				atomicGroup.Txs[current].RqID = atomicGroup.Txs[current-1].TxID
-			}
-		}
+		atomicGroup.Txs[current].Signature = signedTx.Compress()
 	}
 
 	// Post
