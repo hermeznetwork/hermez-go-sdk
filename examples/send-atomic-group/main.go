@@ -71,44 +71,28 @@ func main() {
 		log.Printf("Error Create a Babyjubjub Wallet from Hexdecimal Private Key. Account: %s - Error: %s\n", bjjWallet2.EthAccount.Address.Hex(), err.Error())
 		return
 	}
-	log.Println("Generating BJJ wallet 3...")
-	bjjWallet3, _, err := account.CreateBjjWalletFromHexPvtKey(sourceAccPvtKey3)
-	if err != nil {
-		log.Printf("Error Create a Babyjubjub Wallet from Hexdecimal Private Key. Account: %s - Error: %s\n", bjjWallet3.EthAccount.Address.Hex(), err.Error())
-		return
-	}
 
 	tx1 := transaction.AtomicTxItem{
 		SenderBjjWallet:       bjjWallet1,
 		RecipientAddress:      "0xf495CC4be6896733e8fe5141a62D261110CEb9F3",
 		TokenSymbolToTransfer: "HEZ",
-		Amount:                big.NewInt(3),
-		FeeRangeSelectedID:    0,
-		RqOffSet:              1,
+		Amount:                big.NewInt(200000000000000000),
+		FeeRangeSelectedID:    126,
+		RqOffSet:              1, //+1
 	}
 
 	tx2 := transaction.AtomicTxItem{
 		SenderBjjWallet:       bjjWallet2,
 		RecipientAddress:      "0x137455AFCD2bEc304E39C988b8BCc66a56FDF32a",
 		TokenSymbolToTransfer: "HEZ",
-		Amount:                big.NewInt(1),
-		FeeRangeSelectedID:    0,
-		RqOffSet:              7,
+		Amount:                big.NewInt(100000000000000000),
+		FeeRangeSelectedID:    126,
+		RqOffSet:              7, //-1
 	}
 
-	tx3 := transaction.AtomicTxItem{
-		SenderBjjWallet:       bjjWallet3,
-		RecipientAddress:      "0x715ea08DAE7dCD40E98379D11af237b587BC2f77",
-		TokenSymbolToTransfer: "HEZ",
-		Amount:                big.NewInt(1),
-		FeeRangeSelectedID:    0,
-		RqOffSet:              7,
-	}
-
-	txs := make([]transaction.AtomicTxItem, 3)
+	txs := make([]transaction.AtomicTxItem, 2)
 	txs[0] = tx1
 	txs[1] = tx2
-	txs[2] = tx3
 
 	server, err := transaction.AtomicTransfer(hezClient, 5, txs)
 	if err != nil {
