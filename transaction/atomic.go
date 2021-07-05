@@ -47,7 +47,7 @@ func getAccountDetails(hezClient client.HermezClient, address string,
 			}
 		}
 	}
-	if len(string(idx)) < 1 {
+	if len(strconv.FormatUint(uint64(idx), 10)) < 1 {
 		err = fmt.Errorf("there is no account to this user %s for this Token %s", address, tokenToTransfer)
 		return
 	}
@@ -60,22 +60,22 @@ func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 	atomicGroup := api.AtomicGroup{}
 
 	// configure transactions and do basic validations
-	for _, currentAtomicTxItem := range txs {
+	for currentAtomicTxId := range txs {
 		localTx := hezcommon.PoolL2Tx{}
-		localTx.ToEthAddr = ethCommon.HexToAddress(currentAtomicTxItem.RecipientAddress)
+		localTx.ToEthAddr = ethCommon.HexToAddress(txs[currentAtomicTxId].RecipientAddress)
 		localTx.ToBJJ = hezcommon.EmptyBJJComp
-		localTx.Amount = currentAtomicTxItem.Amount
+		localTx.Amount = txs[currentAtomicTxId].Amount
 		localTx.Type = hezcommon.TxTypeTransfer
-		localTx.Fee = hezcommon.FeeSelector(uint8(currentAtomicTxItem.FeeRangeSelectedID))
-		localTx.TokenSymbol = currentAtomicTxItem.TokenSymbolToTransfer
+		localTx.Fee = hezcommon.FeeSelector(uint8(txs[currentAtomicTxId].FeeRangeSelectedID))
+		localTx.TokenSymbol = txs[currentAtomicTxId].TokenSymbolToTransfer
 
 		// SenderAccount
 		var idx hezcommon.Idx
 		var nonce hezcommon.Nonce
 		var tokenId hezcommon.TokenID
-		idx, nonce, tokenId, err = getAccountDetails(hezClient, currentAtomicTxItem.SenderBjjWallet.EthAccount.Address.Hex(), currentAtomicTxItem.TokenSymbolToTransfer)
+		idx, nonce, tokenId, err = getAccountDetails(hezClient, txs[currentAtomicTxId].SenderBjjWallet.EthAccount.Address.Hex(), txs[currentAtomicTxId].TokenSymbolToTransfer)
 		if err != nil {
-			err = fmt.Errorf("[AtomicTransfer] Error obtaining sender account details. Account: %s - Error: %s\n", currentAtomicTxItem.SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
+			err = fmt.Errorf("[AtomicTransfer] Error obtaining sender account details. Account: %s - Error: %s\n", txs[currentAtomicTxId].SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
 			return
 		}
 		localTx.TokenID = tokenId
@@ -83,9 +83,9 @@ func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 		localTx.FromIdx = idx
 
 		// Recipient Account
-		idx, _, _, err = getAccountDetails(hezClient, currentAtomicTxItem.RecipientAddress, currentAtomicTxItem.TokenSymbolToTransfer)
+		idx, _, _, err = getAccountDetails(hezClient, txs[currentAtomicTxId].RecipientAddress, txs[currentAtomicTxId].TokenSymbolToTransfer)
 		if err != nil {
-			err = fmt.Errorf("[AtomicTransfer] Error obtaining receipient account details. Account: %s - Error: %s\n", currentAtomicTxItem.SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
+			err = fmt.Errorf("[AtomicTransfer] Error obtaining receipient account details. Account: %s - Error: %s\n", txs[currentAtomicTxId].SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
 			return
 		}
 		localTx.ToIdx = idx
@@ -98,45 +98,45 @@ func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 	}
 
 	// Populate RqID and set the RqFields
-	for current, currentAtomicTxItem := range txs {
+	for currentAtomicTxId := range txs {
 		position := 0
-		if currentAtomicTxItem.RqOffSet > 0 && currentAtomicTxItem.RqOffSet < 4 {
-			position = current + currentAtomicTxItem.RqOffSet
+		if txs[currentAtomicTxId].RqOffSet > 0 && txs[currentAtomicTxId].RqOffSet < 4 {
+			position = currentAtomicTxId + txs[currentAtomicTxId].RqOffSet
 		} else {
-			switch currentAtomicTxItem.RqOffSet {
+			switch txs[currentAtomicTxId].RqOffSet {
 			case 4:
-				position = current - 4
+				position = currentAtomicTxId - 4
 			case 5:
-				position = current - 3
+				position = currentAtomicTxId - 3
 			case 6:
-				position = current - 2
+				position = currentAtomicTxId - 2
 			case 7:
-				position = current - 1
+				position = currentAtomicTxId - 1
 			}
 		}
-		atomicGroup.Txs[current].RqFromIdx = atomicGroup.Txs[position].FromIdx
-		atomicGroup.Txs[current].RqToIdx = atomicGroup.Txs[position].ToIdx
-		atomicGroup.Txs[current].RqToEthAddr = atomicGroup.Txs[position].ToEthAddr
-		atomicGroup.Txs[current].RqToBJJ = atomicGroup.Txs[position].ToBJJ
-		atomicGroup.Txs[current].RqNonce = atomicGroup.Txs[position].Nonce
-		atomicGroup.Txs[current].RqFee = atomicGroup.Txs[position].Fee
-		atomicGroup.Txs[current].RqAmount = atomicGroup.Txs[position].Amount
-		atomicGroup.Txs[current].RqOffset = uint8(currentAtomicTxItem.RqOffSet)
+		atomicGroup.Txs[currentAtomicTxId].RqFromIdx = atomicGroup.Txs[position].FromIdx
+		atomicGroup.Txs[currentAtomicTxId].RqToIdx = atomicGroup.Txs[position].ToIdx
+		atomicGroup.Txs[currentAtomicTxId].RqToEthAddr = atomicGroup.Txs[position].ToEthAddr
+		atomicGroup.Txs[currentAtomicTxId].RqToBJJ = atomicGroup.Txs[position].ToBJJ
+		atomicGroup.Txs[currentAtomicTxId].RqNonce = atomicGroup.Txs[position].Nonce
+		atomicGroup.Txs[currentAtomicTxId].RqFee = atomicGroup.Txs[position].Fee
+		atomicGroup.Txs[currentAtomicTxId].RqAmount = atomicGroup.Txs[position].Amount
+		atomicGroup.Txs[currentAtomicTxId].RqOffset = uint8(txs[currentAtomicTxId].RqOffSet)
 	}
 
 	// Generate atomic group id
 	atomicGroup.SetAtomicGroupID()
 
 	// Sign the txs
-	for current, currentAtomicTxItem := range txs {
+	for currentAtomicTxId := range txs {
 		var txHash *big.Int
-		txHash, err = atomicGroup.Txs[current].HashToSign(uint16(ethereumChainID))
+		txHash, err = atomicGroup.Txs[currentAtomicTxId].HashToSign(uint16(ethereumChainID))
 		if err != nil {
-			err = fmt.Errorf("[AtomicTransfer] Error generating currentAtomicTxItem hash. TX: %+v - Error: %s\n", atomicGroup.Txs[current], err.Error())
+			err = fmt.Errorf("[AtomicTransfer] Error generating currentAtomicTxItem hash. TX: %+v - Error: %s\n", atomicGroup.Txs[currentAtomicTxId], err.Error())
 			return
 		}
-		signedTx := currentAtomicTxItem.SenderBjjWallet.PrivateKey.SignPoseidon(txHash)
-		atomicGroup.Txs[current].Signature = signedTx.Compress()
+		signedTx := txs[currentAtomicTxId].SenderBjjWallet.PrivateKey.SignPoseidon(txHash)
+		atomicGroup.Txs[currentAtomicTxId].Signature = signedTx.Compress()
 	}
 
 	// Post
