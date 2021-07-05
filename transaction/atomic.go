@@ -121,6 +121,7 @@ func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 		atomicGroup.Txs[currentAtomicTxId].RqNonce = atomicGroup.Txs[position].Nonce
 		atomicGroup.Txs[currentAtomicTxId].RqFee = atomicGroup.Txs[position].Fee
 		atomicGroup.Txs[currentAtomicTxId].RqAmount = atomicGroup.Txs[position].Amount
+		atomicGroup.Txs[currentAtomicTxId].RqTokenSymbol = atomicGroup.Txs[position].TokenSymbol
 		atomicGroup.Txs[currentAtomicTxId].RqOffset = uint8(txs[currentAtomicTxId].RqOffSet)
 	}
 
@@ -129,6 +130,7 @@ func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 
 	// Sign the txs
 	for currentAtomicTxId := range txs {
+		atomicGroup.Txs[currentAtomicTxId].AtomicGroupID = atomicGroup.ID
 		var txHash *big.Int
 		txHash, err = atomicGroup.Txs[currentAtomicTxId].HashToSign(uint16(ethereumChainID))
 		if err != nil {
