@@ -105,7 +105,7 @@ func MarshalTransaction(itemToTransfer string,
 		}
 	}
 
-	// Get from innerAccount Token and nonce details from receipient innerAccount
+	// Get from innerAccount Token and nonce details from recipient innerAccount
 	for _, innerAccount := range receipientAcctDetails.Accounts {
 		if strings.ToUpper(innerAccount.Token.Symbol) == itemToTransfer {
 			tempAccountsIdx := strings.Split(innerAccount.AccountIndex, ":")
