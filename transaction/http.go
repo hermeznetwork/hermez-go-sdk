@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -70,6 +71,7 @@ func ExecuteAtomicTransaction(hezClient client.HermezClient, atomicTxs api.Atomi
 		err = fmt.Errorf("[ExecuteAtomicTransaction] Error marshaling HTTP request tx: %+v - Error: %s\n", atomicTxs, err.Error())
 		return
 	}
+	log.Println("Bytes sent: ", apiTxBody)
 
 	var URL string
 	//URL = hezClient.ActualCoordinatorURL + "/v1/atomic-pool"
