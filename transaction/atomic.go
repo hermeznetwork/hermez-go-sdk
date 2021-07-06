@@ -79,7 +79,12 @@ func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 			return
 		}
 		localTx.TokenID = tokenId
-		localTx.Nonce = nonce
+		if nonce == 0 {
+			localTx.Nonce = 0
+		} else {
+			localTx.Nonce = nonce + 1
+		}
+
 		localTx.FromIdx = idx
 
 		// Recipient Account
