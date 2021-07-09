@@ -1,13 +1,15 @@
 package main
 
 import (
-	"github.com/hermeznetwork/hermez-go-sdk/account"
-	"github.com/hermeznetwork/hermez-go-sdk/transaction"
+	"fmt"
+	"github.com/hermeznetwork/hermez-node/api"
 	"log"
 	"math/big"
 
+	"github.com/hermeznetwork/hermez-go-sdk/account"
 	"github.com/hermeznetwork/hermez-go-sdk/client"
 	"github.com/hermeznetwork/hermez-go-sdk/node"
+	"github.com/hermeznetwork/hermez-go-sdk/transaction"
 )
 
 const (
@@ -19,7 +21,7 @@ const (
 
 func main() {
 	var debug bool
-	debug = false
+	debug = true
 
 	// Client initialization and
 	log.Println("Starting Hermez Client...")
@@ -76,7 +78,7 @@ func main() {
 		SenderBjjWallet:       bjjWallet1,
 		RecipientAddress:      "0xf495CC4be6896733e8fe5141a62D261110CEb9F3",
 		TokenSymbolToTransfer: "HEZ",
-		Amount:                big.NewInt(200000000000000000),
+		Amount:                big.NewInt(100000000000000000),
 		FeeRangeSelectedID:    126,
 		RqOffSet:              1, //+1
 	}
@@ -94,10 +96,39 @@ func main() {
 	txs[0] = tx1
 	txs[1] = tx2
 
-	server, err := transaction.AtomicTransfer(hezClient, 5, txs)
+	// start the txs generation to send
+	atomicGroup := api.AtomicGroup{}
+
+	// create PoolL2Txs
+	atomicGroup.Txs, err = transaction.CreateFullTxs(hezClient, txs)
+	if err != nil {
+		err = fmt.Errorf("[AtomicTransfer] Error generating PoolL2Tx. Error: %s\n", err.Error())
+		log.Printf(err.Error())
+		return
+	}
+
+	// set AtomicGroupID
+	atomicGroup = transaction.SetAtomicGroupId(atomicGroup)
+
+	// Sign the txs
+	for currentAtomicTxId := range txs {
+		var txHash *big.Int
+		txHash, err = atomicGroup.Txs[currentAtomicTxId].HashToSign(uint16(5))
+		if err != nil {
+			err = fmt.Errorf("[AtomicTransfer] Error generating currentAtomicTxItem hash. TX: %+v - Error: %s\n", atomicGroup.Txs[currentAtomicTxId], err.Error())
+			log.Printf(err.Error())
+			return
+		}
+		signedTx := txs[currentAtomicTxId].SenderBjjWallet.PrivateKey.SignPoseidon(txHash)
+		atomicGroup.Txs[currentAtomicTxId].Signature = signedTx.Compress()
+	}
+
+	// Post
+	var serverResponse string
+	serverResponse, err = transaction.ExecuteAtomicTransaction(hezClient, atomicGroup)
 	if err != nil {
 		log.Printf(err.Error())
 	} else {
-		log.Printf(server)
+		log.Printf(serverResponse)
 	}
 }
