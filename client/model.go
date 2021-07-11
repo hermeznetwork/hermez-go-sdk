@@ -10,18 +10,18 @@ import (
 
 // HermezClient connect to Ethereum node and Hermez Coordinator and Smart Contracts
 type HermezClient struct {
-	EthClient               *ethclient.Client
-	AuctionContract         *HermezAuctionProtocol.HermezAuctionProtocol
-	HttpClient              http.Client
-	BootCoordinatorURL      string
-	BootCoordinatorClient   *sling.Sling
-	ActualCoordinatorURL    string
-	ActualCoordinatorClient *sling.Sling
+	EthClient                *ethclient.Client
+	AuctionContract          *HermezAuctionProtocol.HermezAuctionProtocol
+	HttpClient               http.Client
+	BootCoordinatorURL       string
+	BootCoordinatorClient    *sling.Sling
+	CurrentCoordinatorURL    string
+	CurrentCoordinatorClient *sling.Sling
 }
 
-// SetActualCoordinator updates coordinator definitions based on actual coordinator URL
-func (hezClient *HermezClient) SetActualCoordinator(URL string) {
-	hezClient.ActualCoordinatorURL = URL
+// SetCurrentCoordinator updates coordinator definitions based on current coordinator URL
+func (hezClient *HermezClient) SetCurrentCoordinator(URL string) {
+	hezClient.CurrentCoordinatorURL = URL
 	httpClient := NewHttpClient()
-	hezClient.ActualCoordinatorClient = sling.New().Base(hezClient.ActualCoordinatorURL).Client(&httpClient)
+	hezClient.CurrentCoordinatorClient = sling.New().Base(hezClient.CurrentCoordinatorURL).Client(&httpClient)
 }

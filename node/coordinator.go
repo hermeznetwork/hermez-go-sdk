@@ -9,26 +9,26 @@ import (
 	"github.com/hermeznetwork/hermez-node/db/historydb"
 )
 
-func GetActualCoordinatorNodeInfo(hezClient client.HermezClient) (nodeState historydb.StateAPI, err error) {
-	if len(hezClient.ActualCoordinatorURL) < 10 {
-		err = fmt.Errorf("[Node][GetActualCoordinatorNodeInfo] Actual Coordinator is not set : %s", hezClient.ActualCoordinatorURL)
+func GetCurrentCoordinatorNodeInfo(hezClient client.HermezClient) (nodeState historydb.StateAPI, err error) {
+	if len(hezClient.CurrentCoordinatorURL) < 10 {
+		err = fmt.Errorf("[Node][GetCurrentCoordinatorNodeInfo] Current Coordinator is not set : %s", hezClient.CurrentCoordinatorURL)
 		return
 	}
 	url := "/v1/state"
-	// log.Printf("[Node][GetActualCoordinatorNodeInfo] URL %s", url)
-	req, err := hezClient.ActualCoordinatorClient.New().Get(url).Request()
+	// log.Printf("[Node][GetCurrentCoordinatorNodeInfo] URL %s", url)
+	req, err := hezClient.CurrentCoordinatorClient.New().Get(url).Request()
 	if err != nil {
-		log.Printf("[Node][GetActualCoordinatorNodeInfo] Error boot coordinator info request: %s\n", err.Error())
+		log.Printf("[Node][GetCurrentCoordinatorNodeInfo] Error boot coordinator info request: %s\n", err.Error())
 		return
 	}
 	var failureBody interface{}
-	res, err := hezClient.ActualCoordinatorClient.Do(req, &nodeState, &failureBody)
+	res, err := hezClient.CurrentCoordinatorClient.Do(req, &nodeState, &failureBody)
 	if err != nil {
-		log.Printf("[Node][GetActualCoordinatorNodeInfo] Error pulling actual coordinator info: %s - Error: %s\n", hezClient.ActualCoordinatorURL, err.Error())
+		log.Printf("[Node][GetCurrentCoordinatorNodeInfo] Error pulling current coordinator info: %s - Error: %s\n", hezClient.CurrentCoordinatorURL, err.Error())
 		return
 	}
 	if res.StatusCode != http.StatusOK {
-		log.Printf("[Node][GetActualCoordinatorNodeInfo] Error pulling actual coordinator info from hermez node: %+v - Error: %d\n", failureBody, res.StatusCode)
+		log.Printf("[Node][GetCurrentCoordinatorNodeInfo] Error pulling current coordinator info from hermez node: %+v - Error: %d\n", failureBody, res.StatusCode)
 		return
 	}
 	return

@@ -54,15 +54,17 @@ func getAccountDetails(hezClient client.HermezClient, address string,
 	return
 }
 
-// CreateFullTxs turn the basic information in a PoolL2Tx
+// CreateFullTxs turn the basic information in a PoolL2Tx, set metadata and fields based on the current state. Also
+// links the txs setting the Rq* fields.
 func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs []hezcommon.PoolL2Tx, err error) {
 	// configure transactions and do basic validations
 	for currentAtomicTxId := range txs {
 		localTx := hezcommon.PoolL2Tx{}
+		hezcommon.NewPoolL2Tx(&localTx)
+
 		localTx.ToEthAddr = ethCommon.HexToAddress(txs[currentAtomicTxId].RecipientAddress)
 		localTx.ToBJJ = hezcommon.EmptyBJJComp
 		localTx.Amount = txs[currentAtomicTxId].Amount
-		localTx.Type = hezcommon.TxTypeTransfer
 		localTx.Fee = hezcommon.FeeSelector(uint8(txs[currentAtomicTxId].FeeRangeSelectedID))
 		localTx.TokenSymbol = txs[currentAtomicTxId].TokenSymbolToTransfer
 
@@ -91,7 +93,6 @@ func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs [
 			return
 		}
 		localTx.ToIdx = idx
-		err = localTx.SetID()
 		if err != nil {
 			return
 		}
@@ -100,37 +101,37 @@ func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs [
 	}
 
 	// Populate RqID and set the RqFields
-	for currentAtomicTxId := range txs {
+	for i := range txs {
 		position := 0
-		if txs[currentAtomicTxId].RqOffSet > 0 && txs[currentAtomicTxId].RqOffSet < 4 {
-			position = currentAtomicTxId + txs[currentAtomicTxId].RqOffSet
+		if txs[i].RqOffSet > 0 && txs[i].RqOffSet < 4 {
+			position = i + txs[i].RqOffSet
 		} else {
-			switch txs[currentAtomicTxId].RqOffSet {
+			switch txs[i].RqOffSet {
 			case 4:
-				position = currentAtomicTxId - 4
+				position = i - 4
 			case 5:
-				position = currentAtomicTxId - 3
+				position = i - 3
 			case 6:
-				position = currentAtomicTxId - 2
+				position = i - 2
 			case 7:
-				position = currentAtomicTxId - 1
+				position = i - 1
 			}
 		}
-		fullTxs[currentAtomicTxId].RqFromIdx = fullTxs[position].FromIdx
-		fullTxs[currentAtomicTxId].RqToIdx = fullTxs[position].ToIdx
-		fullTxs[currentAtomicTxId].RqToEthAddr = fullTxs[position].ToEthAddr
-		fullTxs[currentAtomicTxId].RqToBJJ = fullTxs[position].ToBJJ
-		fullTxs[currentAtomicTxId].RqNonce = fullTxs[position].Nonce
-		fullTxs[currentAtomicTxId].RqFee = fullTxs[position].Fee
-		fullTxs[currentAtomicTxId].RqAmount = fullTxs[position].Amount
-		fullTxs[currentAtomicTxId].RqTokenID = fullTxs[position].TokenID
-		fullTxs[currentAtomicTxId].RqOffset = uint8(txs[currentAtomicTxId].RqOffSet)
+		fullTxs[i].RqFromIdx = fullTxs[position].FromIdx
+		fullTxs[i].RqToIdx = fullTxs[position].ToIdx
+		fullTxs[i].RqToEthAddr = fullTxs[position].ToEthAddr
+		fullTxs[i].RqToBJJ = fullTxs[position].ToBJJ
+		fullTxs[i].RqNonce = fullTxs[position].Nonce
+		fullTxs[i].RqFee = fullTxs[position].Fee
+		fullTxs[i].RqAmount = fullTxs[position].Amount
+		fullTxs[i].RqTokenID = fullTxs[position].TokenID
+		fullTxs[i].RqOffset = uint8(txs[i].RqOffSet)
 	}
 	return
 }
 
-// SetAtomicGroupId defines the AtomicGroup ID and propagate to txs
-func SetAtomicGroupId(atomicGroup api.AtomicGroup) api.AtomicGroup {
+// SetAtomicGroupID defines the AtomicGroup ID and propagate to txs
+func SetAtomicGroupID(atomicGroup api.AtomicGroup) api.AtomicGroup {
 	// Generate atomic group id
 	atomicGroup.SetAtomicGroupID()
 
@@ -140,7 +141,9 @@ func SetAtomicGroupId(atomicGroup api.AtomicGroup) api.AtomicGroup {
 	return atomicGroup
 }
 
-// AtomicTransfer perform token or ETH transfers in a pool of transactions
+// AtomicTransfer creates PoolL2Txs using basic information provided in the AtomicTxItems, set metadata and fields based
+// on the current state. Also links the txs setting the Rq* fields and sign txs. After performs token or ETH transfers
+// in a pool of transactions.
 func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 	txs []AtomicTxItem) (serverResponse string, err error) {
 	atomicGroup := api.AtomicGroup{}
@@ -153,22 +156,22 @@ func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 	}
 
 	// set AtomicGroupID
-	atomicGroup = SetAtomicGroupId(atomicGroup)
+	atomicGroup = SetAtomicGroupID(atomicGroup)
 
 	// Sign the txs
-	for currentAtomicTxId := range txs {
+	for i := range txs {
 		var txHash *big.Int
-		txHash, err = atomicGroup.Txs[currentAtomicTxId].HashToSign(uint16(ethereumChainID))
+		txHash, err = atomicGroup.Txs[i].HashToSign(uint16(ethereumChainID))
 		if err != nil {
-			err = fmt.Errorf("[AtomicTransfer] Error generating currentAtomicTxItem hash. TX: %+v - Error: %s\n", atomicGroup.Txs[currentAtomicTxId], err.Error())
+			err = fmt.Errorf("[AtomicTransfer] Error generating currentAtomicTxItem hash. TX: %+v - Error: %s\n", atomicGroup.Txs[i], err.Error())
 			return
 		}
-		signedTx := txs[currentAtomicTxId].SenderBjjWallet.PrivateKey.SignPoseidon(txHash)
-		atomicGroup.Txs[currentAtomicTxId].Signature = signedTx.Compress()
+		signedTx := txs[i].SenderBjjWallet.PrivateKey.SignPoseidon(txHash)
+		atomicGroup.Txs[i].Signature = signedTx.Compress()
 	}
 
 	// Post
-	serverResponse, err = ExecuteAtomicTransaction(hezClient, atomicGroup)
+	serverResponse, err = SendAtomicTxsGroup(hezClient, atomicGroup)
 	if err != nil {
 		err = fmt.Errorf("[AtomicTransfer] Error sending transactions. Error: %s\n", err.Error())
 		return

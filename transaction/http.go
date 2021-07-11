@@ -13,7 +13,7 @@ import (
 	"github.com/hermeznetwork/hermez-node/api"
 )
 
-// ExecuteL2Transaction submits L2 transaction to the actual coordinator endpoint
+// ExecuteL2Transaction submits L2 transaction to the current coordinator endpoint
 func ExecuteL2Transaction(hezClient client.HermezClient, apiTx APITx) (apiTxReturn APITx, serverResponse string, err error) {
 	apiTxBody, err := util.MarshallBody(apiTx)
 	if err != nil {
@@ -22,7 +22,7 @@ func ExecuteL2Transaction(hezClient client.HermezClient, apiTx APITx) (apiTxRetu
 	}
 
 	var URL string
-	URL = hezClient.ActualCoordinatorURL + "/v1/transactions-pool"
+	URL = hezClient.CurrentCoordinatorURL + "/v1/transactions-pool"
 	request, err := http.NewRequest("POST", URL, apiTxBody)
 	if err != nil {
 		err = fmt.Errorf("[ExecuteL2Transaction] Error creating HTTP request. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
@@ -64,21 +64,21 @@ func ExecuteL2Transaction(hezClient client.HermezClient, apiTx APITx) (apiTxRetu
 	return
 }
 
-// ExecuteAtomicTransaction submits Atomic transaction to the actual coordinator endpoint
-func ExecuteAtomicTransaction(hezClient client.HermezClient, atomicTxs api.AtomicGroup) (serverResponse string, err error) {
+// SendAtomicTxsGroup submits Atomic transaction to the current coordinator endpoint
+func SendAtomicTxsGroup(hezClient client.HermezClient, atomicTxs api.AtomicGroup) (serverResponse string, err error) {
 	apiTxBody, err := util.MarshallBody(atomicTxs)
 	if err != nil {
-		err = fmt.Errorf("[ExecuteAtomicTransaction] Error marshaling HTTP request tx: %+v - Error: %s\n", atomicTxs, err.Error())
+		err = fmt.Errorf("[SendAtomicTxsGroup] Error marshaling HTTP request tx: %+v - Error: %s\n", atomicTxs, err.Error())
 		return
 	}
 	log.Println("Bytes sent: ", apiTxBody)
 
 	var URL string
-	//URL = hezClient.ActualCoordinatorURL + "/v1/atomic-pool"
+	//URL = hezClient.CurrentCoordinatorURL + "/v1/atomic-pool"
 	URL = "https://marcelonode.xyz/v1/atomic-pool"
 	request, err := http.NewRequest("POST", URL, apiTxBody)
 	if err != nil {
-		err = fmt.Errorf("[ExecuteAtomicTransaction] Error creating HTTP request. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
+		err = fmt.Errorf("[SendAtomicTxsGroup] Error creating HTTP request. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
 		return
 	}
 	request.Header.Set("Content-Type", "application/json")
@@ -88,7 +88,7 @@ func ExecuteAtomicTransaction(hezClient client.HermezClient, atomicTxs api.Atomi
 
 	response, err := hezClient.HttpClient.Do(request)
 	if err != nil {
-		err = fmt.Errorf("[ExecuteAtomicTransaction] Error submitting HTTP request tx. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
+		err = fmt.Errorf("[SendAtomicTxsGroup] Error submitting HTTP request tx. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
 		return
 	}
 	defer response.Body.Close()
@@ -96,18 +96,18 @@ func ExecuteAtomicTransaction(hezClient client.HermezClient, atomicTxs api.Atomi
 	if response.StatusCode < 200 || response.StatusCode > 299 {
 		tempBuf, errResp := io.ReadAll(response.Body)
 		if errResp != nil {
-			err = fmt.Errorf("[ExecuteAtomicTransaction] Error unmarshaling tx: %+v - Error: %s\n", atomicTxs, errResp.Error())
+			err = fmt.Errorf("[SendAtomicTxsGroup] Error unmarshaling tx: %+v - Error: %s\n", atomicTxs, errResp.Error())
 			return
 		}
 		strJSONRequest := string(tempBuf)
-		err = fmt.Errorf("[ExecuteAtomicTransaction] Error posting TX: %+v\nStatusCode:%d \nStatus: %s\nReturned Message: %s\nURL: %s \nRequest: %+v \nResponse: %+v\n",
+		err = fmt.Errorf("[SendAtomicTxsGroup] Error posting TX: %+v\nStatusCode:%d \nStatus: %s\nReturned Message: %s\nURL: %s \nRequest: %+v \nResponse: %+v\n",
 			atomicTxs, response.StatusCode, response.Status, strJSONRequest, URL, request, response)
 		return
 	}
 
 	b, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		err = fmt.Errorf("[ExecuteAtomicTransaction] Error reading HTTP return from Coordinator. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
+		err = fmt.Errorf("[SendAtomicTxsGroup] Error reading HTTP return from Coordinator. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
 		return
 	}
 
