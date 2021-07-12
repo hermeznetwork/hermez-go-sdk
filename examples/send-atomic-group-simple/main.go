@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	ethereumNodeURL           = "https://geth.marcelonode.xyz"
-	sourceAccPvtKey           = ""
+	ethereumNodeURL           = "https://goerli.infura.io/v3/171aba97e221493db75f0c9900902580"
+	sourceAccPvtKey1          = ""
+	sourceAccPvtKey2          = ""
 	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
 )
 
@@ -20,6 +21,7 @@ func main() {
 	var debug bool
 	debug = false
 
+	// Client initialization and
 	log.Println("Starting Hermez Client...")
 	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex)
 	if err != nil {
@@ -57,21 +59,45 @@ func main() {
 		log.Printf("Boot coordinator URL is: %+v\n", currentCoordNodeState.Auction.BootCoordinatorURL)
 	}
 
-	log.Println("Generating BJJ wallet...")
-	bjjWallet, _, err := account.CreateBjjWalletFromHexPvtKey(sourceAccPvtKey)
+	log.Println("Generating BJJ wallet 1...")
+	bjjWallet1, _, err := account.CreateBjjWalletFromHexPvtKey(sourceAccPvtKey1)
 	if err != nil {
-		log.Printf("Error Create a Babyjubjub Wallet from Hexdecimal Private Key. Account: %s - Error: %s\n", bjjWallet.EthAccount.Address.Hex(), err.Error())
+		log.Printf("Error Create a Babyjubjub Wallet from Hexdecimal Private Key. Account: %s - Error: %s\n", bjjWallet1.EthAccount.Address.Hex(), err.Error())
+		return
+	}
+	log.Println("Generating BJJ wallet 2...")
+	bjjWallet2, _, err := account.CreateBjjWalletFromHexPvtKey(sourceAccPvtKey2)
+	if err != nil {
+		log.Printf("Error Create a Babyjubjub Wallet from Hexdecimal Private Key. Account: %s - Error: %s\n", bjjWallet2.EthAccount.Address.Hex(), err.Error())
 		return
 	}
 
-	apiTx, response, err := transaction.L2Transfer(hezClient,
-		bjjWallet,
-		"0x263C3Ab7E4832eDF623fBdD66ACee71c028Ff591",
-		"HEZ",
-		big.NewInt(983000000000000000),
-		126,
-		5)
+	tx1 := transaction.AtomicTxItem{
+		SenderBjjWallet:       bjjWallet1,
+		RecipientAddress:      "0xf495CC4be6896733e8fe5141a62D261110CEb9F3",
+		TokenSymbolToTransfer: "HEZ",
+		Amount:                big.NewInt(100000000000000000),
+		FeeRangeSelectedID:    126,
+		RqOffSet:              1, //+1
+	}
 
-	log.Println("Transaction ID: ", apiTx.TxID.String())
-	log.Printf("Transaction submitted: %s\n", response)
+	tx2 := transaction.AtomicTxItem{
+		SenderBjjWallet:       bjjWallet2,
+		RecipientAddress:      "0x137455AFCD2bEc304E39C988b8BCc66a56FDF32a",
+		TokenSymbolToTransfer: "HEZ",
+		Amount:                big.NewInt(100000000000000000),
+		FeeRangeSelectedID:    126,
+		RqOffSet:              7, //-1
+	}
+
+	txs := make([]transaction.AtomicTxItem, 2)
+	txs[0] = tx1
+	txs[1] = tx2
+
+	server, err := transaction.AtomicTransfer(hezClient, 5, txs)
+	if err != nil {
+		log.Printf(err.Error())
+	} else {
+		log.Printf(server)
+	}
 }

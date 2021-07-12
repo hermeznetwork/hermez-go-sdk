@@ -10,48 +10,6 @@ import (
 	"github.com/hermeznetwork/hermez-go-sdk/client"
 )
 
-// PostNewBJJAccount post new BJJ Account to Hermez Network to allow L2 - Layer 2 transactions
-// func PostNewBJJAccount(newBjj BJJWallet, hezClient client.HermezClient) (err error) {
-// 	log.Println("[Account][PostNewBJJAccount] Posting new account ", newBjj.HezBjjAddress, " to ", hezClient.ActualCoordinatorURL, " coordinator... ")
-
-// 	URL := hezClient.ActualCoordinatorURL + "/v1/account-creation-authorization"
-// 	request, err := http.NewRequest("POST", URL, apiTxBody)
-// 	if err != nil {
-// 		err = fmt.Errorf("[Account][PostNewBJJAccount] Error creating HTTP request. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
-// 		return
-// 	}
-// 	request.Header.Set("Content-Type", "application/json")
-// 	request.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:88.0) Gecko/20100101 Firefox/88.0")
-// 	request.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-// 	request.Header.Set("Accept-Encoding", "gzip, deflate, br")
-
-// 	response, err := hezClient.HttpClient.Do(request)
-// 	if err != nil {
-// 		err = fmt.Errorf("[Account][PostNewBJJAccount] Error submitting HTTP request new account creation. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
-// 		return
-// 	}
-// 	defer response.Body.Close()
-
-// 	if response.StatusCode < 200 || response.StatusCode > 299 {
-// 		tempBuf, errResp := io.ReadAll(response.Body)
-// 		if errResp != nil {
-// 			err = fmt.Errorf("[ExecuteL2Transaction] Error unmarshaling tx: %+v - Error: %s\n", apiTx, errResp.Error())
-// 			return
-// 		}
-// 		strJSONRequest := string(tempBuf)
-// 		err = fmt.Errorf("[ExecuteL2Transaction] Error posting TX: %+v\nStatusCode:%d \nStatus: %s\nReturned Message: %s\nURL: %s \nRequest: %+v \nResponse: %+v\n",
-// 			apiTx, response.StatusCode, response.Status, strJSONRequest, URL, request, response)
-// 		return
-// 	}
-
-// 	b, err := ioutil.ReadAll(response.Body)
-// 	if err != nil {
-// 		err = fmt.Errorf("[ExecuteL2Transaction] Error reading HTTP return from Coordinator. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
-// 		return
-// 	}
-// 	return
-// }
-
 // GetAccountInfo connects to a hermez node and pull account data
 func GetAccountInfo(hezClient client.HermezClient, account string) (hezAccount AccountAPIResponse, err error) {
 	log.Println("[Account][GetAccountInfo] Pulling account info ", account, " from a coordinator...")

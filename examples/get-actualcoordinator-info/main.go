@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	nodeURL                   = "http://geth.marcelonode.xyz:8545"
+	nodeURL                   = "https://geth.marcelonode.xyz/"
 	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
 )
 
@@ -26,18 +26,18 @@ func main() {
 		log.Printf("Error obtaining boot coordinator info. URL: %s - Error: %s\n", hezClient.BootCoordinatorURL, err.Error())
 		return
 	}
-	log.Println("Setting actual client ...")
-	hezClient.SetActualCoordinator(bootCoordNodeState.Network.NextForgers[0].Coordinator.URL)
-	log.Println("Actual client is set.")
-	log.Printf("Pulling actual coordinator (%s) info...\n", hezClient.ActualCoordinatorURL)
-	actualCoordNodeState, err := node.GetActualCoordinatorNodeInfo(hezClient)
+	log.Println("Setting current client ...")
+	hezClient.SetCurrentCoordinator(bootCoordNodeState.Network.NextForgers[0].Coordinator.URL)
+	log.Println("Current client is set.")
+	log.Printf("Pulling current coordinator (%s) info...\n", hezClient.CurrentCoordinatorURL)
+	currentCoordNodeState, err := node.GetCurrentCoordinatorNodeInfo(hezClient)
 	if err != nil {
 		log.Printf("Error obtaining boot coordinator info. URL: %s - Error: %s\n", hezClient.BootCoordinatorURL, err.Error())
 		return
 	}
-	log.Printf("Actual coordinator info is: %+v\n", actualCoordNodeState)
-	if len(actualCoordNodeState.Network.NextForgers) > 0 {
-		log.Printf("Actual coordinator URL is: %s\n", actualCoordNodeState.Network.NextForgers[0].Coordinator.URL)
+	log.Printf("Current coordinator info is: %+v\n", currentCoordNodeState)
+	if len(currentCoordNodeState.Network.NextForgers) > 0 {
+		log.Printf("Current coordinator URL is: %s\n", currentCoordNodeState.Network.NextForgers[0].Coordinator.URL)
 	}
-	log.Printf("Boot coordinator URL is: %+v\n", actualCoordNodeState.Auction.BootCoordinatorURL)
+	log.Printf("Boot coordinator URL is: %+v\n", currentCoordNodeState.Auction.BootCoordinatorURL)
 }
