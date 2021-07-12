@@ -60,8 +60,6 @@ func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs [
 	// configure transactions and do basic validations
 	for currentAtomicTxId := range txs {
 		localTx := hezcommon.PoolL2Tx{}
-		hezcommon.NewPoolL2Tx(&localTx)
-
 		localTx.ToEthAddr = ethCommon.HexToAddress(txs[currentAtomicTxId].RecipientAddress)
 		localTx.ToBJJ = hezcommon.EmptyBJJComp
 		localTx.Amount = txs[currentAtomicTxId].Amount
@@ -97,6 +95,7 @@ func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs [
 			return
 		}
 
+		hezcommon.NewPoolL2Tx(&localTx)
 		fullTxs = append(fullTxs, localTx)
 	}
 
