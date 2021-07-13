@@ -10,7 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/hermeznetwork/hermez-go-sdk/client"
 	"github.com/hermeznetwork/hermez-go-sdk/util"
-	"github.com/hermeznetwork/hermez-node/api"
+
+	hezCommon "github.com/hermeznetwork/hermez-node/common"
 )
 
 // ExecuteL2Transaction submits L2 transaction to the current coordinator endpoint
@@ -65,7 +66,7 @@ func ExecuteL2Transaction(hezClient client.HermezClient, apiTx APITx) (apiTxRetu
 }
 
 // SendAtomicTxsGroup submits Atomic transaction to the current coordinator endpoint
-func SendAtomicTxsGroup(hezClient client.HermezClient, atomicTxs api.AtomicGroup) (serverResponse string, err error) {
+func SendAtomicTxsGroup(hezClient client.HermezClient, atomicTxs hezCommon.AtomicGroup) (serverResponse string, err error) {
 	apiTxBody, err := util.MarshallBody(atomicTxs)
 	if err != nil {
 		err = fmt.Errorf("[SendAtomicTxsGroup] Error marshaling HTTP request tx: %+v - Error: %s\n", atomicTxs, err.Error())

@@ -8,10 +8,9 @@ import (
 
 	"github.com/hermeznetwork/hermez-go-sdk/account"
 	"github.com/hermeznetwork/hermez-go-sdk/client"
-	"github.com/hermeznetwork/hermez-node/api"
 
 	ethCommon "github.com/ethereum/go-ethereum/common"
-	hezcommon "github.com/hermeznetwork/hermez-node/common"
+	hezCommon "github.com/hermeznetwork/hermez-node/common"
 )
 
 type AtomicTxItem struct {
@@ -24,7 +23,7 @@ type AtomicTxItem struct {
 }
 
 func getAccountDetails(hezClient client.HermezClient, address string,
-	tokenToTransfer string) (idx hezcommon.Idx, nonce hezcommon.Nonce, tokenId hezcommon.TokenID, err error) {
+	tokenToTransfer string) (idx hezCommon.Idx, nonce hezCommon.Nonce, tokenId hezCommon.TokenID, err error) {
 	var accDetails account.AccountAPIResponse
 	accDetails, err = account.GetAccountInfo(hezClient, address)
 	if err != nil {
@@ -33,8 +32,8 @@ func getAccountDetails(hezClient client.HermezClient, address string,
 	}
 	for _, innerAccount := range accDetails.Accounts {
 		if strings.ToUpper(innerAccount.Token.Symbol) == tokenToTransfer {
-			tokenId = hezcommon.TokenID(innerAccount.Token.ID)
-			nonce = hezcommon.Nonce(innerAccount.Nonce)
+			tokenId = hezCommon.TokenID(innerAccount.Token.ID)
+			nonce = hezCommon.Nonce(innerAccount.Nonce)
 			tempAccountsIdx := strings.Split(innerAccount.AccountIndex, ":")
 			if len(tempAccountsIdx) == 3 {
 				var tempAccIdx int
@@ -43,7 +42,7 @@ func getAccountDetails(hezClient client.HermezClient, address string,
 					err = fmt.Errorf("error getting account index. Account: %+v - Error: %s\n", innerAccount, err.Error())
 					return
 				}
-				idx = hezcommon.Idx(tempAccIdx)
+				idx = hezCommon.Idx(tempAccIdx)
 			}
 		}
 	}
@@ -56,20 +55,20 @@ func getAccountDetails(hezClient client.HermezClient, address string,
 
 // CreateFullTxs turn the basic information in a PoolL2Tx, set metadata and fields based on the current state. Also
 // links the txs setting the Rq* fields.
-func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs []hezcommon.PoolL2Tx, err error) {
+func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs []hezCommon.PoolL2Tx, err error) {
 	// configure transactions and do basic validations
 	for currentAtomicTxId := range txs {
-		localTx := hezcommon.PoolL2Tx{}
+		localTx := hezCommon.PoolL2Tx{}
 		localTx.ToEthAddr = ethCommon.HexToAddress(txs[currentAtomicTxId].RecipientAddress)
-		localTx.ToBJJ = hezcommon.EmptyBJJComp
+		localTx.ToBJJ = hezCommon.EmptyBJJComp
 		localTx.Amount = txs[currentAtomicTxId].Amount
-		localTx.Fee = hezcommon.FeeSelector(uint8(txs[currentAtomicTxId].FeeRangeSelectedID))
+		localTx.Fee = hezCommon.FeeSelector(uint8(txs[currentAtomicTxId].FeeRangeSelectedID))
 		localTx.TokenSymbol = txs[currentAtomicTxId].TokenSymbolToTransfer
 
 		// SenderAccount
-		var idx hezcommon.Idx
-		var nonce hezcommon.Nonce
-		var tokenId hezcommon.TokenID
+		var idx hezCommon.Idx
+		var nonce hezCommon.Nonce
+		var tokenId hezCommon.TokenID
 		idx, nonce, tokenId, err = getAccountDetails(hezClient, txs[currentAtomicTxId].SenderBjjWallet.EthAccount.Address.Hex(), txs[currentAtomicTxId].TokenSymbolToTransfer)
 		if err != nil {
 			err = fmt.Errorf("[AtomicTransfer] Error obtaining sender account details. Account: %s - Error: %s\n", txs[currentAtomicTxId].SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
@@ -95,7 +94,7 @@ func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs [
 			return
 		}
 
-		hezcommon.NewPoolL2Tx(&localTx)
+		hezCommon.NewPoolL2Tx(&localTx)
 		fullTxs = append(fullTxs, localTx)
 	}
 
@@ -130,7 +129,7 @@ func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs [
 }
 
 // SetAtomicGroupID defines the AtomicGroup ID and propagate to txs
-func SetAtomicGroupID(atomicGroup api.AtomicGroup) api.AtomicGroup {
+func SetAtomicGroupID(atomicGroup hezCommon.AtomicGroup) hezCommon.AtomicGroup {
 	// Generate atomic group id
 	atomicGroup.SetAtomicGroupID()
 
@@ -145,7 +144,7 @@ func SetAtomicGroupID(atomicGroup api.AtomicGroup) api.AtomicGroup {
 // in a pool of transactions.
 func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 	txs []AtomicTxItem) (serverResponse string, err error) {
-	atomicGroup := api.AtomicGroup{}
+	atomicGroup := hezCommon.AtomicGroup{}
 
 	// create PoolL2Txs
 	atomicGroup.Txs, err = CreateFullTxs(hezClient, txs)
