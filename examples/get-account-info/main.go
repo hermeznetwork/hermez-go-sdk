@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ethereumNodeURL           = "http://geth.marcelonode.xyz:8545"
+	ethereumNodeURL           = "https://goerli.infura.io/v3/171aba97e221493db75f0c9900902580"
 	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
 )
 
