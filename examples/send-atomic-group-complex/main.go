@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/hermeznetwork/hermez-node/api"
 	"log"
 	"math/big"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/hermeznetwork/hermez-go-sdk/client"
 	"github.com/hermeznetwork/hermez-go-sdk/node"
 	"github.com/hermeznetwork/hermez-go-sdk/transaction"
+	hezCommon "github.com/hermeznetwork/hermez-node/common"
 )
 
 const (
@@ -97,7 +97,7 @@ func main() {
 	txs[1] = tx2
 
 	// start the txs generation to send
-	atomicGroup := api.AtomicGroup{}
+	atomicGroup := hezCommon.AtomicGroup{}
 
 	// create PoolL2Txs
 	atomicGroup.Txs, err = transaction.CreateFullTxs(hezClient, txs)
@@ -119,8 +119,8 @@ func main() {
 			log.Printf(err.Error())
 			return
 		}
-		signedTx := txs[currentAtomicTxId].SenderBjjWallet.PrivateKey.SignPoseidon(txHash)
-		atomicGroup.Txs[currentAtomicTxId].Signature = signedTx.Compress()
+		signature := txs[currentAtomicTxId].SenderBjjWallet.PrivateKey.SignPoseidon(txHash)
+		atomicGroup.Txs[currentAtomicTxId].Signature = signature.Compress()
 	}
 
 	// Post
