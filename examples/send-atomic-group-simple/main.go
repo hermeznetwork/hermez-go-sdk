@@ -23,7 +23,7 @@ func main() {
 
 	// Client initialization and
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex)
+	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex, 5)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return
@@ -74,7 +74,7 @@ func main() {
 
 	tx1 := transaction.AtomicTxItem{
 		SenderBjjWallet:       bjjWallet1,
-		RecipientAddress:      "0xf495CC4be6896733e8fe5141a62D261110CEb9F3",
+		ReceiverAddress:       "0xf495CC4be6896733e8fe5141a62D261110CEb9F3",
 		TokenSymbolToTransfer: "HEZ",
 		Amount:                big.NewInt(100000000000000000),
 		FeeRangeSelectedID:    126,
@@ -83,7 +83,7 @@ func main() {
 
 	tx2 := transaction.AtomicTxItem{
 		SenderBjjWallet:       bjjWallet2,
-		RecipientAddress:      "0x137455AFCD2bEc304E39C988b8BCc66a56FDF32a",
+		ReceiverAddress:       "0x137455AFCD2bEc304E39C988b8BCc66a56FDF32a",
 		TokenSymbolToTransfer: "HEZ",
 		Amount:                big.NewInt(100000000000000000),
 		FeeRangeSelectedID:    126,
@@ -94,7 +94,7 @@ func main() {
 	txs[0] = tx1
 	txs[1] = tx2
 
-	server, err := transaction.AtomicTransfer(hezClient, 5, txs)
+	server, err := transaction.AtomicTransfer(hezClient, txs)
 	if err != nil {
 		log.Printf(err.Error())
 	} else {
