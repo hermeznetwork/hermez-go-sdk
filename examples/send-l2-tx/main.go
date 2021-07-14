@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	ethereumNodeURL           = "https://geth.marcelonode.xyz"
+	ethereumNodeURL           = ""
 	sourceAccPvtKey           = ""
 	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
 )

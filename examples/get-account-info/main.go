@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ethereumNodeURL           = "http://geth.marcelonode.xyz:8545"
+	ethereumNodeURL           = ""
 	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
 )
 
@@ -21,8 +21,7 @@ func main() {
 	}
 	log.Println("Connected to Hermez Smart Contracts...")
 	log.Println("Pulling account info from a coordinator...")
-	// testAccountString := "6LJgHxQWiqB8hxYShBLTcBpAKuVyoJ8Bpol2EXDNuwM9"
-	// testAccountString := "0x263c3ab7e4832edf623fbdd66acee71c028ff591"
+
 	testAccountString := "ETH:21499"
 	accountDetails, err := account.GetAccountInfo(hezClient, testAccountString)
 	if err != nil {
