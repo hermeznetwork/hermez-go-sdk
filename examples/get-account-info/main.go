@@ -14,7 +14,7 @@ const (
 
 func main() {
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex)
+	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex, 5)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return

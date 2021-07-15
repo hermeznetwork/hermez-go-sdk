@@ -21,7 +21,7 @@ func main() {
 	debug = false
 
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex)
+	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex, 5)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return
@@ -69,8 +69,7 @@ func main() {
 		"0x263C3Ab7E4832eDF623fBdD66ACee71c028Ff591",
 		"HEZ",
 		big.NewInt(983000000000000000),
-		126,
-		5)
+		126)
 
 	log.Println("Transaction ID: ", apiTx.TxID.String())
 	log.Printf("Transaction submitted: %s\n", response)

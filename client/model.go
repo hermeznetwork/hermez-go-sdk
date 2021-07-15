@@ -17,6 +17,7 @@ type HermezClient struct {
 	BootCoordinatorClient    *sling.Sling
 	CurrentCoordinatorURL    string
 	CurrentCoordinatorClient *sling.Sling
+	EthereumChainID          int
 }
 
 // SetCurrentCoordinator updates coordinator definitions based on current coordinator URL

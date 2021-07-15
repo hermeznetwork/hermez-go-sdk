@@ -11,16 +11,15 @@ import (
 // L2Transfer perform token or ETH transfer within Hermez network (we say L2 or Layer2)
 func L2Transfer(hezClient client.HermezClient,
 	senderBjjWallet account.BJJWallet,
-	recipientAddress string,
+	receiverAddress string,
 	tokenSymbolToTransfer string,
 	amount *big.Int,
-	feeRangeSelectedID int,
-	ethereumChainID int) (apiTxReturn APITx, serverResponse string, err error) {
+	feeRangeSelectedID int) (apiTxReturn APITx, serverResponse string, err error) {
 
 	// log.Println("[L2Transfer] Parameters")
 	// log.Printf("hezClient: %+v\n", hezClient)
 	// log.Printf("senderBjjWallet: %+v", senderBjjWallet)
-	// log.Println("recipientAddress: ", recipientAddress)
+	// log.Println("receiverAddress: ", receiverAddress)
 	// log.Println("tokenSymbolToTransfer: ", tokenSymbolToTransfer)
 	// log.Println("amount: ", amount.String())
 	// log.Println("feeRangeSelectedID: ", feeRangeSelectedID)
@@ -39,16 +38,16 @@ func L2Transfer(hezClient client.HermezClient,
 	// log.Println("BJJ Address local: ", bjjWallet.HezBjjAddress)
 	// log.Printf("Wallet details %+v\n", bjjWallet)
 
-	recipientAccDetails, err := account.GetAccountInfo(hezClient, recipientAddress)
+	receiverAccDetails, err := account.GetAccountInfo(hezClient, receiverAddress)
 	if err != nil {
-		err = fmt.Errorf("[L2Transfer] Error obtaining account details. Account: %s - Error: %s\n", recipientAddress, err.Error())
+		err = fmt.Errorf("[L2Transfer] Error obtaining account details. Account: %s - Error: %s\n", receiverAddress, err.Error())
 		return
 	}
 
-	// log.Printf("\n\nReceipient Account details from Coordinator: %+v\n\n", recipientAccDetails)
-	// log.Println("BJJ Address in server: ", recipientAccDetails.Accounts[0].BJJAddress)
+	// log.Printf("\n\nReceipient Account details from Coordinator: %+v\n\n", receiverAccDetails)
+	// log.Println("BJJ Address in server: ", receiverAccDetails.Accounts[0].BJJAddress)
 
-	apiTxReturn, err = MarshalTransaction(tokenSymbolToTransfer, senderAccDetails, recipientAccDetails, senderBjjWallet, amount, feeRangeSelectedID, ethereumChainID)
+	apiTxReturn, err = MarshalTransaction(tokenSymbolToTransfer, senderAccDetails, receiverAccDetails, senderBjjWallet, amount, feeRangeSelectedID, hezClient.EthereumChainID)
 	if err != nil {
 		err = fmt.Errorf("[L2Transfer] Error marsheling tx data to prepare to send to coordinator. Error: %s\n", err.Error())
 		return
