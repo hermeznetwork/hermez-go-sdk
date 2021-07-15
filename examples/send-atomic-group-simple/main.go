@@ -94,7 +94,8 @@ func main() {
 	txs[0] = tx1
 	txs[1] = tx2
 
-	server, err := transaction.AtomicTransfer(hezClient, txs)
+	server, atomicGroupID, err := transaction.AtomicTransfer(hezClient, txs)
+	log.Printf("Atomic group ID: %s", atomicGroupID)
 	if err != nil {
 		log.Printf(err.Error())
 	} else {

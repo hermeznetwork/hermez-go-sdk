@@ -113,6 +113,9 @@ func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs [
 				position = i - 2
 			case 7:
 				position = i - 1
+			case 0:
+				err = fmt.Errorf("[CreateFullTxs]: Invalid rqOffSet")
+				return
 			}
 		}
 		fullTxs[i].RqFromIdx = fullTxs[position].FromIdx
@@ -142,7 +145,7 @@ func SetAtomicGroupID(atomicGroup hezCommon.AtomicGroup) hezCommon.AtomicGroup {
 // AtomicTransfer creates PoolL2Txs using basic information provided in the AtomicTxItems, set metadata and fields based
 // on the current state. Also links the txs setting the Rq* fields and sign txs. After performs token or ETH transfers
 // in a pool of transactions.
-func AtomicTransfer(hezClient client.HermezClient, txs []AtomicTxItem) (serverResponse string, err error) {
+func AtomicTransfer(hezClient client.HermezClient, txs []AtomicTxItem) (serverResponse string, atomicGroupID hezCommon.AtomicGroupID, err error) {
 	atomicGroup := hezCommon.AtomicGroup{}
 
 	// create PoolL2Txs
@@ -154,6 +157,7 @@ func AtomicTransfer(hezClient client.HermezClient, txs []AtomicTxItem) (serverRe
 
 	// set AtomicGroupID
 	atomicGroup = SetAtomicGroupID(atomicGroup)
+	atomicGroupID = atomicGroup.ID
 
 	// Sign the txs
 	for i := range txs {
@@ -166,6 +170,65 @@ func AtomicTransfer(hezClient client.HermezClient, txs []AtomicTxItem) (serverRe
 		signedTx := txs[i].SenderBjjWallet.PrivateKey.SignPoseidon(txHash)
 		atomicGroup.Txs[i].Signature = signedTx.Compress()
 	}
+
+	// Post
+	serverResponse, err = SendAtomicTxsGroup(hezClient, atomicGroup)
+	if err != nil {
+		err = fmt.Errorf("[AtomicTransfer] Error sending transactions. Error: %s\n", err.Error())
+		return
+	}
+
+	return
+}
+
+// AtomicTransferJSON receives an array of AtomicTxItems in JSON format, create PoolL2Txs, atomic group, sign and post
+func AtomicTransferJSON(hezClient client.HermezClient, txsJSON []string) (serverResponse string, atomicGroupID hezCommon.AtomicGroupID, err error) {
+	atomicGroup := hezCommon.AtomicGroup{}
+
+	for _, currentJSON := range txsJSON {
+		localTx := hezCommon.PoolL2Tx{}
+		err = localTx.UnmarshalJSON([]byte(currentJSON))
+		if err != nil {
+			err = fmt.Errorf("[AtomicTransferJSON] Error Unmarshalling JSON %s - Error: %s\n", currentJSON, err.Error())
+			return
+		}
+		hezCommon.NewPoolL2Tx(&localTx)
+		atomicGroup.Txs = append(atomicGroup.Txs, localTx)
+	}
+
+	// Populate RqID and set the RqFields
+	for i := range atomicGroup.Txs {
+		position := 0
+		if atomicGroup.Txs[i].RqOffset > 0 && atomicGroup.Txs[i].RqOffset < 4 {
+			position = i + int(atomicGroup.Txs[i].RqOffset)
+		} else {
+			switch atomicGroup.Txs[i].RqOffset {
+			case 4:
+				position = i - 4
+			case 5:
+				position = i - 3
+			case 6:
+				position = i - 2
+			case 7:
+				position = i - 1
+			case 0:
+				err = fmt.Errorf("[CreateFullTxs]: Invalid rqOffSet")
+				return
+			}
+		}
+		atomicGroup.Txs[i].RqFromIdx = atomicGroup.Txs[position].FromIdx
+		atomicGroup.Txs[i].RqToIdx = atomicGroup.Txs[position].ToIdx
+		atomicGroup.Txs[i].RqToEthAddr = atomicGroup.Txs[position].ToEthAddr
+		atomicGroup.Txs[i].RqToBJJ = atomicGroup.Txs[position].ToBJJ
+		atomicGroup.Txs[i].RqNonce = atomicGroup.Txs[position].Nonce
+		atomicGroup.Txs[i].RqFee = atomicGroup.Txs[position].Fee
+		atomicGroup.Txs[i].RqAmount = atomicGroup.Txs[position].Amount
+		atomicGroup.Txs[i].RqTokenID = atomicGroup.Txs[position].TokenID
+	}
+
+	// set AtomicGroupID
+	atomicGroup = SetAtomicGroupID(atomicGroup)
+	atomicGroupID = atomicGroup.ID
 
 	// Post
 	serverResponse, err = SendAtomicTxsGroup(hezClient, atomicGroup)
