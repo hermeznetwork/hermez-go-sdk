@@ -16,7 +16,7 @@ const (
 func main() {
 	// Client initialization
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex)
+	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex, 5)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return
@@ -70,7 +70,8 @@ func main() {
 				"signature": "03272ada607829d29c35b27e7cb1889ba65e02961950ac45bf9e49f2639cf91a980fda0f6c9553389162af70d022d1447cf1daee90651745609de870ba6eba05",
 				"requestOffset": 7 }`
 
-	server, err := transaction.AtomicTransferJSON(hezClient, 5, txs)
+	server, atomicGroupID, err := transaction.AtomicTransferJSON(hezClient, txs)
+	log.Printf("Atomic group ID: %s", atomicGroupID)
 	if err != nil {
 		log.Printf(err.Error())
 	} else {

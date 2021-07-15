@@ -145,7 +145,7 @@ func SetAtomicGroupID(atomicGroup hezCommon.AtomicGroup) hezCommon.AtomicGroup {
 // AtomicTransfer creates PoolL2Txs using basic information provided in the AtomicTxItems, set metadata and fields based
 // on the current state. Also links the txs setting the Rq* fields and sign txs. After performs token or ETH transfers
 // in a pool of transactions.
-func AtomicTransfer(hezClient client.HermezClient, txs []AtomicTxItem) (serverResponse string, err error) {
+func AtomicTransfer(hezClient client.HermezClient, txs []AtomicTxItem) (serverResponse string, atomicGroupID hezCommon.AtomicGroupID, err error) {
 	atomicGroup := hezCommon.AtomicGroup{}
 
 	// create PoolL2Txs
@@ -157,6 +157,7 @@ func AtomicTransfer(hezClient client.HermezClient, txs []AtomicTxItem) (serverRe
 
 	// set AtomicGroupID
 	atomicGroup = SetAtomicGroupID(atomicGroup)
+	atomicGroupID = atomicGroup.ID
 
 	// Sign the txs
 	for i := range txs {
@@ -181,8 +182,7 @@ func AtomicTransfer(hezClient client.HermezClient, txs []AtomicTxItem) (serverRe
 }
 
 // AtomicTransferJSON receives an array of AtomicTxItems in JSON format, create PoolL2Txs, atomic group, sign and post
-func AtomicTransferJSON(hezClient client.HermezClient, ethereumChainID int,
-	txsJSON []string) (serverResponse string, err error) {
+func AtomicTransferJSON(hezClient client.HermezClient, txsJSON []string) (serverResponse string, atomicGroupID hezCommon.AtomicGroupID, err error) {
 	atomicGroup := hezCommon.AtomicGroup{}
 
 	for _, currentJSON := range txsJSON {
@@ -228,6 +228,7 @@ func AtomicTransferJSON(hezClient client.HermezClient, ethereumChainID int,
 
 	// set AtomicGroupID
 	atomicGroup = SetAtomicGroupID(atomicGroup)
+	atomicGroupID = atomicGroup.ID
 
 	// Post
 	serverResponse, err = SendAtomicTxsGroup(hezClient, atomicGroup)
