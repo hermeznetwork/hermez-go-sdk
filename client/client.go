@@ -8,6 +8,7 @@ import (
 	"github.com/dghubble/sling"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+
 	HermezAuctionProtocol "github.com/hermeznetwork/hermez-node/eth/contracts/auction"
 )
 
@@ -17,7 +18,7 @@ const (
 	defaultTimeoutCall     = 2 * time.Minute
 )
 
-func NewHermezClient(nodeURL string, auctionContractAddressHex string) (hezClient HermezClient, err error) {
+func NewHermezClient(nodeURL string, auctionContractAddressHex string, ethereumChainID int) (hezClient HermezClient, err error) {
 	ethClient, err := getCustomEthereumClient(nodeURL)
 	if err != nil {
 		log.Printf("Error during ETH client initialization: %s\n", err.Error())
@@ -37,6 +38,7 @@ func NewHermezClient(nodeURL string, auctionContractAddressHex string) (hezClien
 		return
 	}
 
+	hezClient.EthereumChainID = ethereumChainID
 	hezClient.HttpClient = NewHttpClient()
 	bootCoordHttpClient := NewHttpClient()
 	hezClient.BootCoordinatorURL = bootCoordURL

@@ -68,20 +68,11 @@ func BjjToString(bjj babyjub.PublicKeyComp) string {
 // MarshalTransaction marshal transaction information into a Hermez transaction API request
 func MarshalTransaction(itemToTransfer string,
 	senderAcctDetails account.AccountAPIResponse,
-	receipientAcctDetails account.AccountAPIResponse,
+	receiverAcctDetails account.AccountAPIResponse,
 	senderBjjWallet account.BJJWallet,
 	amount *big.Int,
 	feeSelector int,
 	ethereumChainID int) (apiTxRequest APITx, err error) {
-
-	// log.Println("[MarshalTransaction] Parameters")
-	// log.Printf("senderAcctDetails: %+v\n", senderAcctDetails)
-	// log.Printf("senderBjjWallet: %+v\n", senderBjjWallet)
-	// log.Printf("receipientAcctDetails: %+v\n", receipientAcctDetails)
-	// log.Println("itemToTransfer: ", itemToTransfer)
-	// log.Println("amount: ", amount.String())
-	// log.Println("feeSelector: ", feeSelector)
-	// log.Println("ethereumChainID: ", ethereumChainID)
 
 	var token hezcommon.Token
 	var nonce hezcommon.Nonce
@@ -105,8 +96,8 @@ func MarshalTransaction(itemToTransfer string,
 		}
 	}
 
-	// Get from innerAccount Token and nonce details from recipient innerAccount
-	for _, innerAccount := range receipientAcctDetails.Accounts {
+	// Get from innerAccount Token and nonce details from receiver innerAccount
+	for _, innerAccount := range receiverAcctDetails.Accounts {
 		if strings.ToUpper(innerAccount.Token.Symbol) == itemToTransfer {
 			tempAccountsIdx := strings.Split(innerAccount.AccountIndex, ":")
 			if len(tempAccountsIdx) == 3 {
@@ -129,7 +120,7 @@ func MarshalTransaction(itemToTransfer string,
 
 	// If there is no innerAccount created to this specific token stop the code
 	if len(toIdx.String()) < 1 {
-		err = fmt.Errorf("[MarshalTransaction] There is no receipient Account to this user %+v for this Token %s", receipientAcctDetails, itemToTransfer)
+		err = fmt.Errorf("[MarshalTransaction] There is no receipient Account to this user %+v for this Token %s", receiverAcctDetails, itemToTransfer)
 		log.Println(err.Error())
 		return
 	}

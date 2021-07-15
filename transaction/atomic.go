@@ -15,7 +15,7 @@ import (
 
 type AtomicTxItem struct {
 	SenderBjjWallet       account.BJJWallet
-	RecipientAddress      string
+	ReceiverAddress       string
 	TokenSymbolToTransfer string
 	Amount                *big.Int
 	FeeRangeSelectedID    int
@@ -59,7 +59,7 @@ func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs [
 	// configure transactions and do basic validations
 	for currentAtomicTxId := range txs {
 		localTx := hezCommon.PoolL2Tx{}
-		localTx.ToEthAddr = ethCommon.HexToAddress(txs[currentAtomicTxId].RecipientAddress)
+		localTx.ToEthAddr = ethCommon.HexToAddress(txs[currentAtomicTxId].ReceiverAddress)
 		localTx.ToBJJ = hezCommon.EmptyBJJComp
 		localTx.Amount = txs[currentAtomicTxId].Amount
 		localTx.Fee = hezCommon.FeeSelector(uint8(txs[currentAtomicTxId].FeeRangeSelectedID))
@@ -83,8 +83,8 @@ func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs [
 
 		localTx.FromIdx = idx
 
-		// Recipient Account
-		idx, _, _, err = getAccountDetails(hezClient, txs[currentAtomicTxId].RecipientAddress, txs[currentAtomicTxId].TokenSymbolToTransfer)
+		// Receiver Account
+		idx, _, _, err = getAccountDetails(hezClient, txs[currentAtomicTxId].ReceiverAddress, txs[currentAtomicTxId].TokenSymbolToTransfer)
 		if err != nil {
 			err = fmt.Errorf("[AtomicTransfer] Error obtaining receipient account details. Account: %s - Error: %s\n", txs[currentAtomicTxId].SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
 			return
@@ -145,8 +145,7 @@ func SetAtomicGroupID(atomicGroup hezCommon.AtomicGroup) hezCommon.AtomicGroup {
 // AtomicTransfer creates PoolL2Txs using basic information provided in the AtomicTxItems, set metadata and fields based
 // on the current state. Also links the txs setting the Rq* fields and sign txs. After performs token or ETH transfers
 // in a pool of transactions.
-func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
-	txs []AtomicTxItem) (serverResponse string, err error) {
+func AtomicTransfer(hezClient client.HermezClient, txs []AtomicTxItem) (serverResponse string, err error) {
 	atomicGroup := hezCommon.AtomicGroup{}
 
 	// create PoolL2Txs
@@ -162,7 +161,7 @@ func AtomicTransfer(hezClient client.HermezClient, ethereumChainID int,
 	// Sign the txs
 	for i := range txs {
 		var txHash *big.Int
-		txHash, err = atomicGroup.Txs[i].HashToSign(uint16(ethereumChainID))
+		txHash, err = atomicGroup.Txs[i].HashToSign(uint16(hezClient.EthereumChainID))
 		if err != nil {
 			err = fmt.Errorf("[AtomicTransfer] Error generating currentAtomicTxItem hash. TX: %+v - Error: %s\n", atomicGroup.Txs[i], err.Error())
 			return
