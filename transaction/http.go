@@ -75,8 +75,8 @@ func SendAtomicTxsGroup(hezClient client.HermezClient, atomicTxs hezCommon.Atomi
 	log.Println("Bytes sent: ", apiTxBody)
 
 	var URL string
-	//URL = hezClient.CurrentCoordinatorURL + "/v1/atomic-pool"
-	URL = "https://marcelonode.xyz/v1/atomic-pool"
+	URL = hezClient.CurrentCoordinatorURL + "/v1/atomic-pool"
+	// URL = "https://marcelonode.xyz/v1/atomic-pool"
 	request, err := http.NewRequest("POST", URL, apiTxBody)
 	if err != nil {
 		err = fmt.Errorf("[SendAtomicTxsGroup] Error creating HTTP request. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
@@ -112,6 +112,6 @@ func SendAtomicTxsGroup(hezClient client.HermezClient, atomicTxs hezCommon.Atomi
 		return
 	}
 
-	serverResponse = fmt.Sprintln("Transaction ID submmited: ", atomicTxs.ID.String(), "Message returned in Hex: %s\n", common.Bytes2Hex(b))
+	serverResponse = fmt.Sprintln("Atomic Group ID submmited: ", atomicTxs.ID.String(), "Message returned in Hex: %s\n", common.Bytes2Hex(b))
 	return
 }

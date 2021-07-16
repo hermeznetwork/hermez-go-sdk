@@ -3,6 +3,7 @@ module github.com/hermeznetwork/hermez-go-sdk
 go 1.16
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/dghubble/sling v1.3.0
 	github.com/ethereum/go-ethereum v1.10.4
 	github.com/hermeznetwork/hermez-node v1.5.0-rc2.0.20210713144540-6a0bb24d49e4

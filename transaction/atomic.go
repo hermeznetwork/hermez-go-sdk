@@ -8,8 +8,8 @@ import (
 
 	"github.com/hermeznetwork/hermez-go-sdk/account"
 	"github.com/hermeznetwork/hermez-go-sdk/client"
+	"github.com/hermeznetwork/hermez-node/log"
 
-	ethCommon "github.com/ethereum/go-ethereum/common"
 	hezCommon "github.com/hermeznetwork/hermez-node/common"
 )
 
@@ -57,44 +57,58 @@ func getAccountDetails(hezClient client.HermezClient, address string,
 // links the txs setting the Rq* fields.
 func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs []hezCommon.PoolL2Tx, err error) {
 	// configure transactions and do basic validations
-	for currentAtomicTxId := range txs {
+	for i := range txs {
 		localTx := hezCommon.PoolL2Tx{}
-		localTx.ToEthAddr = ethCommon.HexToAddress(txs[currentAtomicTxId].RecipientAddress)
+		addr, e := hezCommon.HezStringToEthAddr(txs[i].RecipientAddress, "")
+		if e != nil {
+			err = e
+			return
+		}
+		localTx.ToEthAddr = *addr
+		// log.Info(txs[i].RecipientAddress)
+		// log.Info(ethCommon.HexToAddress(txs[i].RecipientAddress))
+		log.Info(localTx.ToEthAddr)
 		localTx.ToBJJ = hezCommon.EmptyBJJComp
-		localTx.Amount = txs[currentAtomicTxId].Amount
-		localTx.Fee = hezCommon.FeeSelector(uint8(txs[currentAtomicTxId].FeeRangeSelectedID))
-		localTx.TokenSymbol = txs[currentAtomicTxId].TokenSymbolToTransfer
+		localTx.Amount = txs[i].Amount
+		localTx.Fee = hezCommon.FeeSelector(uint8(txs[i].FeeRangeSelectedID))
+		localTx.TokenSymbol = txs[i].TokenSymbolToTransfer
 
 		// SenderAccount
 		var idx hezCommon.Idx
 		var nonce hezCommon.Nonce
 		var tokenId hezCommon.TokenID
-		idx, nonce, tokenId, err = getAccountDetails(hezClient, txs[currentAtomicTxId].SenderBjjWallet.EthAccount.Address.Hex(), txs[currentAtomicTxId].TokenSymbolToTransfer)
+		idx, nonce, tokenId, err = getAccountDetails(hezClient, txs[i].SenderBjjWallet.EthAccount.Address.Hex(), txs[i].TokenSymbolToTransfer)
 		if err != nil {
-			err = fmt.Errorf("[AtomicTransfer] Error obtaining sender account details. Account: %s - Error: %s\n", txs[currentAtomicTxId].SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
+			err = fmt.Errorf("[AtomicTransfer] Error obtaining sender account details. Account: %s - Error: %s\n", txs[i].SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
 			return
 		}
 		localTx.TokenID = tokenId
-		if nonce == 0 {
-			localTx.Nonce = 0
-		} else {
-			localTx.Nonce = nonce + 1
-		}
+		localTx.Nonce = nonce
+		// if nonce == 0 {
+		// 	localTx.Nonce = 0
+		// } else {
+		// 	localTx.Nonce = nonce + 1
+		// }
 
 		localTx.FromIdx = idx
 
-		// Recipient Account
-		idx, _, _, err = getAccountDetails(hezClient, txs[currentAtomicTxId].RecipientAddress, txs[currentAtomicTxId].TokenSymbolToTransfer)
-		if err != nil {
-			err = fmt.Errorf("[AtomicTransfer] Error obtaining receipient account details. Account: %s - Error: %s\n", txs[currentAtomicTxId].SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
-			return
-		}
-		localTx.ToIdx = idx
-		if err != nil {
-			return
-		}
+		// // Recipient Account
+		// idx, _, _, err = getAccountDetails(hezClient, txs[i].RecipientAddress, txs[i].TokenSymbolToTransfer)
+		// if err != nil {
+		// 	err = fmt.Errorf("[AtomicTransfer] Error obtaining receipient account details. Account: %s - Error: %s\n", txs[i].SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
+		// 	return
+		// }
+		// localTx.ToIdx = idx
+		// if err != nil {
+		// 	return
+		// }
+		// j, _ := json.Marshal(localTx)
+		// panic(string(j))
 
-		hezCommon.NewPoolL2Tx(&localTx)
+		if _, err = hezCommon.NewPoolL2Tx(&localTx); err != nil {
+			err = fmt.Errorf("[AtomicTransfer] Error generating TxID or Type - Error: %s\n", err)
+			return nil, err
+		}
 		fullTxs = append(fullTxs, localTx)
 	}
 

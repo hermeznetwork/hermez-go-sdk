@@ -16,3 +16,6 @@
 # vendor/
 
 examples/send-atomic-group/Example_atomic_tx
+
+# Private info
+test/config.toml
