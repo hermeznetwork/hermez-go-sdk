@@ -21,8 +21,8 @@ func GetAccountInfo(hezClient client.HermezClient, account string) (hezAccount A
 		err = fmt.Errorf("[Account][GetAccountInfo] Boot Coordinator is not set : %s", hezClient.BootCoordinatorURL)
 		return
 	}
-	account = formatHezAccountAddress(account)
-	url := "/v1/accounts?" + account
+	// account = formatHezAccountAddress(account)
+	url := "/v1/accounts?BJJ=" + account
 	// log.Printf("[Account][GetAccountInfo] URL %s", url)
 	req, err := hezClient.BootCoordinatorClient.New().Get(url).Request()
 	if err != nil {

@@ -22,7 +22,7 @@ type AtomicTxItem struct {
 	RqOffSet              int
 }
 
-func getAccountDetails(hezClient client.HermezClient, address string,
+func GetAccountDetails(hezClient client.HermezClient, address string,
 	tokenToTransfer string) (idx hezCommon.Idx, nonce hezCommon.Nonce, tokenId hezCommon.TokenID, err error) {
 	var accDetails account.AccountAPIResponse
 	accDetails, err = account.GetAccountInfo(hezClient, address)
@@ -77,7 +77,7 @@ func CreateFullTxs(hezClient client.HermezClient, txs []AtomicTxItem) (fullTxs [
 		var idx hezCommon.Idx
 		var nonce hezCommon.Nonce
 		var tokenId hezCommon.TokenID
-		idx, nonce, tokenId, err = getAccountDetails(hezClient, txs[i].SenderBjjWallet.EthAccount.Address.Hex(), txs[i].TokenSymbolToTransfer)
+		idx, nonce, tokenId, err = GetAccountDetails(hezClient, txs[i].SenderBjjWallet.EthAccount.Address.Hex(), txs[i].TokenSymbolToTransfer)
 		if err != nil {
 			err = fmt.Errorf("[AtomicTransfer] Error obtaining sender account details. Account: %s - Error: %s\n", txs[i].SenderBjjWallet.EthAccount.Address.Hex(), err.Error())
 			return
