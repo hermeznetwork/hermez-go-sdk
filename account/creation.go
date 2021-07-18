@@ -9,6 +9,8 @@ import (
 	"log"
 
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	hezcommon "github.com/hermeznetwork/hermez-node/common"
 	"github.com/iden3/go-iden3-crypto/babyjub"
@@ -96,7 +98,7 @@ func CreateBjjWalletFromMnemonic(mnemonic string) (bjjWallet BJJWallet, ethAccou
 }
 
 // CreateBjjWalletFromHexPvtKey Create a Babyjubjub Wallet from Hexdecimal Private Key
-func CreateBjjWalletFromHexPvtKey(hexPvtKey string) (bjjWallet BJJWallet, ethAccount accounts.Account, err error) {
+func CreateBjjWalletFromHexPvtKey(hexPvtKey string, chainID int, rollupContractAddress string) (bjjWallet BJJWallet, ethAccount accounts.Account, err error) {
 	ecdsaPvtKey, err := crypto.HexToECDSA(hexPvtKey)
 	if err != nil {
 		log.Printf("[CreateBjjWalletFromHexPvtKey] Error when creating private key: %s\n", err.Error())
@@ -145,6 +147,14 @@ func CreateBjjWalletFromHexPvtKey(hexPvtKey string) (bjjWallet BJJWallet, ethAcc
 	bjjWallet.EthAccount = ethAccount
 	bjjWallet.HezEthAddress = "hez:" + ethAccount.Address.Hex()
 
+	rollupAddress := common.HexToAddress(rollupContractAddress)
+	signature, err := CreateHermezAuthSignature(ecdsaPvtKey, ethAccount, bjjPubKeyCompressed, chainID, rollupAddress)
+	if err != nil {
+		log.Printf("[CreateBjjWalletFromHexPvtKey] Error creating CreateHermezAuthSignature: %+v - %d - %s - Error: %s\n", bjjPubKeyCompressed, chainID, rollupAddress, err.Error())
+		return
+	}
+	bjjWallet.HezEthSignature = signature
+
 	return
 }
 
@@ -159,4 +169,32 @@ func FromBJJPubKeyCompToHezBJJAddress(pkComp babyjub.PublicKeyComp) (string, err
 	}
 	bjjSum := append(pkComp[:], sum)
 	return "hez:" + base64.RawURLEncoding.EncodeToString(bjjSum), nil
+}
+
+// CreateHermezAuthSignature creates the hermez wallet authentication signature
+func CreateHermezAuthSignature(ethPk *ecdsa.PrivateKey, ethAccount accounts.Account, bjjPubKeyComp babyjub.PublicKeyComp, chainID int, rollupContract common.Address) (string, error) {
+	auth := &hezcommon.AccountCreationAuth{
+		EthAddr: ethAccount.Address,
+		BJJ:     bjjPubKeyComp,
+	}
+	uChainID := uint16(chainID)
+	err := auth.Sign(func(hash []byte) ([]byte, error) {
+		return crypto.Sign(hash, ethPk)
+	}, uChainID, rollupContract)
+
+	hash, err := auth.HashToSign(uChainID, rollupContract)
+	if err != nil {
+		return "", err
+	}
+
+	signature, err := crypto.Sign(hash, ethPk)
+	if err != nil {
+		return "", err
+	}
+	signature[64] += 27
+
+	if !auth.VerifySignature(uChainID, rollupContract) {
+		return "", errors.New("invalid signature")
+	}
+	return hexutil.Encode(signature), nil
 }
