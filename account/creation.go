@@ -147,8 +147,10 @@ func CreateBjjWalletFromHexPvtKey(hexPvtKey string, chainID int, rollupContractA
 	bjjWallet.EthAccount = ethAccount
 	bjjWallet.HezEthAddress = "hez:" + ethAccount.Address.Hex()
 
+	var bjjPubKeyCompressedNoSwapped babyjub.PublicKeyComp
+	copy(bjjPubKeyCompressedNoSwapped[:], decodedBjjPubKey[:])
 	rollupAddress := common.HexToAddress(rollupContractAddress)
-	signature, err := CreateHermezAuthSignature(ecdsaPvtKey, ethAccount, bjjPubKeyCompressed, chainID, rollupAddress)
+	signature, err := CreateHermezAuthSignature(ecdsaPvtKey, ethAccount, bjjPubKeyCompressedNoSwapped, chainID, rollupAddress)
 	if err != nil {
 		log.Printf("[CreateBjjWalletFromHexPvtKey] Error creating CreateHermezAuthSignature: %+v - %d - %s - Error: %s\n", bjjPubKeyCompressed, chainID, rollupAddress, err.Error())
 		return
