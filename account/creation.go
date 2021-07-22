@@ -179,7 +179,7 @@ func CreateHermezAuthSignature(ethPk *ecdsa.PrivateKey, ethAccount accounts.Acco
 		BJJ:     bjjPubKeyComp,
 	}
 
-	if chainID > 65536 {
+	if chainID > 65536 || chainID < 0 {
 		err := errors.New("Invalid chainID. Max number can be 65536")
 		return "", err
 	}
