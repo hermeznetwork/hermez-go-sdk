@@ -73,7 +73,7 @@ func main() {
 	accountCreation := account.AccountCreation{}
 	accountCreation.EthereumAddress = bjjWallet.HezEthAddress
 	accountCreation.HezBjjAddress = bjjWallet.HezBjjAddress
-	accountCreation.Signature = bjjWallet.HezEthSignature
+	accountCreation.Signature = bjjWallet.AccountCreationAuthSignature
 
 	log.Printf("\naccount creation: %+v\n", accountCreation)
 

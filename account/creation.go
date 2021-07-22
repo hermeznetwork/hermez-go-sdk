@@ -154,7 +154,7 @@ func CreateBjjWalletFromHexPvtKey(hexPvtKey string, chainID int, rollupContractA
 		log.Printf("[CreateBjjWalletFromHexPvtKey] Error creating CreateHermezAuthSignature: %+v - %d - %s - Error: %s\n", bjjPubKeyCompressed, chainID, rollupAddress, err.Error())
 		return
 	}
-	bjjWallet.HezEthSignature = signature
+	bjjWallet.AccountCreationAuthSignature = signature
 
 	return
 }
