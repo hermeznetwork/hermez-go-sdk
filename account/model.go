@@ -36,9 +36,17 @@ type Token struct {
 
 // BJJWallet BJJ Wallet
 type BJJWallet struct {
-	PrivateKey    babyjub.PrivateKey
-	PublicKey     babyjub.PublicKeyComp
-	HezBjjAddress string
-	EthAccount    accounts.Account
-	HezEthAddress string
+	PrivateKey      babyjub.PrivateKey
+	PublicKey       babyjub.PublicKeyComp
+	HezBjjAddress   string
+	EthAccount      accounts.Account
+	HezEthAddress   string
+	AccountCreationAuthSignature string
+}
+
+// AccountCreation is used to submit new account creation to a Hermez Node
+type AccountCreation struct {
+	EthereumAddress string `json:"hezEthereumAddress"`
+	HezBjjAddress   string `json:"bjj"`
+	Signature       string `json:"signature"`
 }
