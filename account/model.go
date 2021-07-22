@@ -41,7 +41,7 @@ type BJJWallet struct {
 	HezBjjAddress   string
 	EthAccount      accounts.Account
 	HezEthAddress   string
-	HezEthSignature string
+	AccountCreationAuthSignature string
 }
 
 // AccountCreation is used to submit new account creation to a Hermez Node
