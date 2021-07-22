@@ -146,6 +146,10 @@ func CreateBjjWalletFromHexPvtKey(hexPvtKey string, chainID int, rollupContractA
 	bjjWallet.EthAccount = ethAccount
 	bjjWallet.HezEthAddress = "hez:" + ethAccount.Address.Hex()
 
+	if chainID == 0 || !common.IsHexAddress(rollupContractAddress) {
+		return
+	}
+
 	var bjjPubKeyCompressedNoSwapped babyjub.PublicKeyComp
 	copy(bjjPubKeyCompressedNoSwapped[:], decodedBjjPubKey[:])
 	rollupAddress := common.HexToAddress(rollupContractAddress)
