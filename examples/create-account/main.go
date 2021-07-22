@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	ethereumNodeURL           = "https://goerli.infura.io/v3/dfc83c12e02149a585a67cd6a6338f9d"
-	sourceAccPvtKey           = "4e6f697354656e686f333242697473566f6365506f6465416372656469746172"
+	ethereumNodeURL           = ""
+	sourceAccPvtKey           = ""
 	auctionContractAddressHex = "0x1d5c3dd2003118743d596d7db7ea07de6c90fb20"
 	rollupContractAddress     = "0xf08a226b67a8a9f99ccfcf51c50867bc18a54f53"
 	chainID                   = 5

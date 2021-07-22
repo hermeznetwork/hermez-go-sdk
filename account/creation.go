@@ -10,7 +10,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	hezcommon "github.com/hermeznetwork/hermez-node/common"
 	"github.com/iden3/go-iden3-crypto/babyjub"
@@ -179,24 +178,22 @@ func CreateHermezAuthSignature(ethPk *ecdsa.PrivateKey, ethAccount accounts.Acco
 		EthAddr: ethAccount.Address,
 		BJJ:     bjjPubKeyComp,
 	}
+
+	if chainID > 65536 {
+		err := errors.New("Invalid chainID. Max number can be 65536")
+		return "", err
+	}
 	uChainID := uint16(chainID)
+
 	err := auth.Sign(func(hash []byte) ([]byte, error) {
 		return crypto.Sign(hash, ethPk)
 	}, uChainID, rollupContract)
-
-	hash, err := auth.HashToSign(uChainID, rollupContract)
 	if err != nil {
 		return "", err
 	}
-
-	signature, err := crypto.Sign(hash, ethPk)
-	if err != nil {
-		return "", err
-	}
-	signature[64] += 27
 
 	if !auth.VerifySignature(uChainID, rollupContract) {
 		return "", errors.New("invalid signature")
 	}
-	return hexutil.Encode(signature), nil
+	return hex.EncodeToString(auth.Signature), nil
 }
