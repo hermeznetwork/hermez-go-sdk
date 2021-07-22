@@ -395,8 +395,8 @@ github.com/hashicorp/memberlist v0.1.3/go.mod h1:ajVTdAv/9Im8oMAAj5G31PhhMCZJV2p
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=
 github.com/hermeznetwork/hermez-go-sdk v0.1.1/go.mod h1:IJUcE8mSHTAX0aucz0CxNwatWglvwmqh77fyvFqnEuw=
 github.com/hermeznetwork/hermez-node v1.1.0/go.mod h1:cq4UzG6AqY+KTzgsIyU2/LggAYhUB/DHI7B+FGvg4nw=
-github.com/hermeznetwork/hermez-node v1.5.0 h1:sCoUky/n3WPfQcspVxTGFua+PFWLykQmUoDi4vUMnQQ=
-github.com/hermeznetwork/hermez-node v1.5.0/go.mod h1:Y9gyihU4uCnndbdFSeDcxJzKKw3LixQBsax/THxrbF4=
+github.com/hermeznetwork/hermez-node v1.6.0-rc1 h1:3X2JgzQX2PbfPGItC43iYwof9HiyeKUBHV7iXNYfgDE=
+github.com/hermeznetwork/hermez-node v1.6.0-rc1/go.mod h1:k1/gPw04W4s2MPIxs4pF7ROd6EsWM0FZfZ1NBWVpVGw=
 github.com/hermeznetwork/tracerr v0.3.1-0.20210120162744-5da60b576169 h1:I7zgVVlOgf+26yrrKKY9UT+9f73qqlNBGX6C9MPXnk4=
 github.com/hermeznetwork/tracerr v0.3.1-0.20210120162744-5da60b576169/go.mod h1:nsWC1+tc4qUEbUGRv4DcPJJTjLsedlPajlFmpJoohK4=
 github.com/holiman/bloomfilter/v2 v2.0.3 h1:73e0e/V0tCydx14a0SCYS/EWCxgwLZ18CZcZKVu0fao=
@@ -795,6 +795,7 @@ github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:
 github.com/xtaci/kcp-go v5.4.5+incompatible/go.mod h1:bN6vIwHQbfHaHtFpEssmWsN45a+AZwO7eyRCmEIbtvE=
 github.com/xtaci/lossyconn v0.0.0-20190602105132-8df528c0c9ae/go.mod h1:gXtu8J62kEgmN++bm9BVICuT/e8yiLI2KFobd/TRFsE=
 github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0/go.mod h1:/LWChgwKmvncFJFHJ7Gvn9wZArjbV5/FppcK2fKk/tI=
+github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869/go.mod h1:Rfzr+sqaDreiCaoQbFCu3sTXxeFq/9kXRuyOoSlGQHE=
 github.com/yudai/gojsondiff v1.0.0/go.mod h1:AY32+k2cwILAkW1fbgxQ5mUmMiZFgLIV+FBNExI05xg=
 github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82/go.mod h1:lgjkn3NuSvDfVJdfcVVdX+jpBxNmX4rDAzaS45IcYoM=
 github.com/yudai/pp v2.0.1+incompatible/go.mod h1:PuxR/8QJ7cyCkFp/aUDS+JY727OFEZkTdatxwunjIkc=
