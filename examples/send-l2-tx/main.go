@@ -58,7 +58,7 @@ func main() {
 	}
 
 	log.Println("Generating BJJ wallet...")
-	bjjWallet, _, err := account.CreateBjjWalletFromHexPvtKey(sourceAccPvtKey, 0, "")
+	bjjWallet, _, err := account.CreateBjjWalletFromHexPvtKey(sourceAccPvtKey)
 	if err != nil {
 		log.Printf("Error Create a Babyjubjub Wallet from Hexdecimal Private Key. Account: %s - Error: %s\n", bjjWallet.EthAccount.Address.Hex(), err.Error())
 		return
