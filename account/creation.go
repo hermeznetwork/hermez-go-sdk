@@ -97,7 +97,12 @@ func CreateBjjWalletFromMnemonic(mnemonic string) (bjjWallet BJJWallet, ethAccou
 }
 
 // CreateBjjWalletFromHexPvtKey Create a Babyjubjub Wallet from Hexdecimal Private Key
-func CreateBjjWalletFromHexPvtKey(hexPvtKey string, chainID int, rollupContractAddress string) (bjjWallet BJJWallet, ethAccount accounts.Account, err error) {
+func CreateBjjWalletFromHexPvtKey(hexPvtKey string) (bjjWallet BJJWallet, ethAccount accounts.Account, err error) {
+	return CreateBjjWalletWithAccCreationSignatureFromHexPvtKey(hexPvtKey, 0, "")
+}
+
+// CreateBjjWalletWithAccCreationSignatureFromHexPvtKey Create a Babyjubjub Wallet from Hexdecimal Private Key with hermez account creation signature
+func CreateBjjWalletWithAccCreationSignatureFromHexPvtKey(hexPvtKey string, chainID int, rollupContractAddress string) (bjjWallet BJJWallet, ethAccount accounts.Account, err error) {
 	ecdsaPvtKey, err := crypto.HexToECDSA(hexPvtKey)
 	if err != nil {
 		log.Printf("[CreateBjjWalletFromHexPvtKey] Error when creating private key: %s\n", err.Error())
