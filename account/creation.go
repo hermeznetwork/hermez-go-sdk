@@ -201,8 +201,9 @@ func CreateHermezAuthSignature(ethPk *ecdsa.PrivateKey, ethAccount accounts.Acco
 		return "", err
 	}
 
-	if !auth.VerifySignature(uChainID, rollupContract) {
-		return "", errors.New("invalid signature")
+	_, err = auth.VerifySignature(uChainID, rollupContract)
+	if err != nil {
+		return "", errors.New("invalid signature: " + err.Error())
 	}
 	return hex.EncodeToString(auth.Signature), nil
 }

@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	ethereumNodeURL = "https://goerli.infura.io/v3/dfc83c12e02149a585a67cd6a6338f9d"
-	sourceAccPvtKey = "3030303254656e686f333242697473566f6365506f6465416372656469746172"
+	ethereumNodeURL = "https://goerli.infura.io/v3/"
+	sourceAccPvtKey = "3030303454656e686f333242697473566f6365506f6465416372656469746172"
 	network         = "goerli"
 	debug           = false
 )
