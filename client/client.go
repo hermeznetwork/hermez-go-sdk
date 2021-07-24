@@ -34,7 +34,7 @@ func NewHermezClient(nodeURL string, auctionContractAddressHex string, ethereumC
 	hezClient.AuctionContract = auctionContract
 	bootCoordURL, err := hezClient.AuctionContract.BootCoordinatorURL(nil)
 	if err != nil {
-		log.Printf("Error during boot coordinator url query: %s\n", err.Error())
+		log.Printf("Error during boot coordinator url query: %s - auctionContractAddressHex: %s\n", err.Error(), auctionContractAddressHex)
 		return
 	}
 

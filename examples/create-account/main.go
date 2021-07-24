@@ -10,24 +10,26 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/hermeznetwork/hermez-go-sdk/account"
 	"github.com/hermeznetwork/hermez-go-sdk/client"
+	sdkcommon "github.com/hermeznetwork/hermez-go-sdk/common"
 	"github.com/hermeznetwork/hermez-go-sdk/node"
 	"github.com/hermeznetwork/hermez-go-sdk/util"
 )
 
 const (
-	ethereumNodeURL           = ""
-	sourceAccPvtKey           = ""
-	auctionContractAddressHex = "0x1d5c3dd2003118743d596d7db7ea07de6c90fb20"
-	rollupContractAddress     = "0xf08a226b67a8a9f99ccfcf51c50867bc18a54f53"
-	chainID                   = 5
+	ethereumNodeURL = "https://goerli.infura.io/v3/dfc83c12e02149a585a67cd6a6338f9d"
+	sourceAccPvtKey = "3030303254656e686f333242697473566f6365506f6465416372656469746172"
+	network         = "goerli"
+	debug           = false
 )
 
 func main() {
-	var debug bool
-	debug = false
-
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex, chainID)
+	networkDefinition, err := sdkcommon.GetNetworkDefinition(network)
+	if err != nil {
+		log.Printf("Error getting hermez definition at %s . Error: %s\n", network, err.Error())
+		return
+	}
+	hezClient, err := client.NewHermezClient(ethereumNodeURL, networkDefinition.AuctionContractAddress.Hex(), networkDefinition.ChainID)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return
@@ -64,7 +66,8 @@ func main() {
 	}
 
 	log.Println("Generating BJJ wallet...")
-	bjjWallet, _, err := account.CreateBjjWalletWithAccCreationSignatureFromHexPvtKey(sourceAccPvtKey, chainID, rollupContractAddress)
+	bjjWallet, _, err := account.CreateBjjWalletWithAccCreationSignatureFromHexPvtKey(
+		sourceAccPvtKey, networkDefinition.ChainID, networkDefinition.RollupContractAddress.Hex())
 	if err != nil {
 		log.Printf("Error Create a Babyjubjub Wallet from Hexdecimal Private Key. Account: %s - Error: %s\n", bjjWallet.EthAccount.Address.Hex(), err.Error())
 		return
