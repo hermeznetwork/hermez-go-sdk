@@ -397,6 +397,8 @@ github.com/hermeznetwork/hermez-go-sdk v0.1.1/go.mod h1:IJUcE8mSHTAX0aucz0CxNwat
 github.com/hermeznetwork/hermez-node v1.1.0/go.mod h1:cq4UzG6AqY+KTzgsIyU2/LggAYhUB/DHI7B+FGvg4nw=
 github.com/hermeznetwork/hermez-node v1.6.0-rc1 h1:3X2JgzQX2PbfPGItC43iYwof9HiyeKUBHV7iXNYfgDE=
 github.com/hermeznetwork/hermez-node v1.6.0-rc1/go.mod h1:k1/gPw04W4s2MPIxs4pF7ROd6EsWM0FZfZ1NBWVpVGw=
+github.com/hermeznetwork/hermez-node v1.6.0-rc2 h1:i8inP6jBOVfhM5qvPVl959d4gzU9LivlUsi5vtVlEVA=
+github.com/hermeznetwork/hermez-node v1.6.0-rc2/go.mod h1:k1/gPw04W4s2MPIxs4pF7ROd6EsWM0FZfZ1NBWVpVGw=
 github.com/hermeznetwork/tracerr v0.3.1-0.20210120162744-5da60b576169 h1:I7zgVVlOgf+26yrrKKY9UT+9f73qqlNBGX6C9MPXnk4=
 github.com/hermeznetwork/tracerr v0.3.1-0.20210120162744-5da60b576169/go.mod h1:nsWC1+tc4qUEbUGRv4DcPJJTjLsedlPajlFmpJoohK4=
 github.com/holiman/bloomfilter/v2 v2.0.3 h1:73e0e/V0tCydx14a0SCYS/EWCxgwLZ18CZcZKVu0fao=
