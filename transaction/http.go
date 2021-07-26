@@ -75,7 +75,7 @@ func SendAtomicTxsGroup(hezClient client.HermezClient, atomicTxs hezCommon.Atomi
 	log.Println("Bytes sent: ", apiTxBody)
 
 	var URL string
-	//URL = hezClient.CurrentCoordinatorURL + "/v1/atomic-pool"
+	// URL = hezClient.CurrentCoordinatorURL + "/v1/atomic-pool"
 	URL = "https://marcelonode.xyz/v1/atomic-pool"
 	request, err := http.NewRequest("POST", URL, apiTxBody)
 	if err != nil {
@@ -113,5 +113,30 @@ func SendAtomicTxsGroup(hezClient client.HermezClient, atomicTxs hezCommon.Atomi
 	}
 
 	serverResponse = fmt.Sprintln("Transaction ID submmited: ", atomicTxs.ID.String(), "Message returned in Hex: %s\n", common.Bytes2Hex(b))
+	return
+}
+
+// GetTransactionsInPool connects to a hermez node and pull all transactions in the pool
+func GetTransactionsInPool(hezClient client.HermezClient) (transactions TransactionsAPIResponse, err error) {
+	if len(hezClient.BootCoordinatorURL) < 10 {
+		err = fmt.Errorf("[Transaction][GetTransactionsInPool] Boot Coordinator is not set : %s", hezClient.BootCoordinatorURL)
+		return
+	}
+	url := "/v1/transactions-pool?limit=1000"
+	req, err := hezClient.BootCoordinatorClient.New().Get(url).Request()
+	if err != nil {
+		log.Printf("[Transaction][GetTransactionsInPool] Error pulling transactions info from request: %s\n", err.Error())
+		return
+	}
+	var failureBody interface{}
+	res, err := hezClient.BootCoordinatorClient.Do(req, &transactions, &failureBody)
+	if err != nil {
+		log.Printf("[Transaction][GetTransactionsInPool] Error pulling transactions info from hermez node: %s - Error: %s\n", hezClient.BootCoordinatorURL, err.Error())
+		return
+	}
+	if res.StatusCode != http.StatusOK {
+		log.Printf("[Transaction][GetTransactionsInPool] HTTP Error pulling transactions info from hermez node: %+v - Error: %d\n", failureBody, res.StatusCode)
+		return
+	}
 	return
 }

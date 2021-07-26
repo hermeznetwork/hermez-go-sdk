@@ -11,7 +11,7 @@ import (
 // HermezClient connect to Ethereum node and Hermez Coordinator and Smart Contracts
 type HermezClient struct {
 	EthClient                *ethclient.Client
-	AuctionContract          *HermezAuctionProtocol.HermezAuctionProtocol
+	AuctionContract          *HermezAuctionProtocol.Auction
 	HttpClient               http.Client
 	BootCoordinatorURL       string
 	BootCoordinatorClient    *sling.Sling
