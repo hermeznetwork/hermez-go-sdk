@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"log"
 	"math/big"
@@ -9,23 +10,24 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/hermeznetwork/hermez-go-sdk/account"
-	hezcommon "github.com/hermeznetwork/hermez-node/common"
+	hezCommon "github.com/hermeznetwork/hermez-node/common"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 )
 
 // NewHermezAPITxRequest convert L2 tx to Hermez API request model
-func NewHermezAPITxRequest(poolTx *hezcommon.PoolL2Tx, token hezcommon.Token) APITx {
+func NewHermezAPITxRequest(poolTx *hezCommon.PoolL2Tx, token hezCommon.Token) APITx {
 	toIdx := "hez:ETH:0"
 	if poolTx.ToIdx > 0 {
 		toIdx = IdxToHez(poolTx.ToIdx, token.Symbol)
 	}
 	toEth := ""
-	if poolTx.ToEthAddr != hezcommon.EmptyAddr {
+	if poolTx.ToEthAddr != hezCommon.EmptyAddr {
 		toEth = ethAddrToHez(poolTx.ToEthAddr)
 	}
 	toBJJ := BjjToString(poolTx.ToBJJ)
-	if poolTx.ToBJJ != hezcommon.EmptyBJJComp {
+	if poolTx.ToBJJ != hezCommon.EmptyBJJComp {
 		toBJJ = BjjToString(poolTx.ToBJJ)
 	}
 	return APITx{
@@ -43,10 +45,83 @@ func NewHermezAPITxRequest(poolTx *hezcommon.PoolL2Tx, token hezcommon.Token) AP
 	}
 }
 
+func NewSignedAPITxFromEthAddr(chainID int, fromBjjWallet account.BJJWallet, fromIdx int64, toEthAddress string, amount *big.Int, feeSelector hezCommon.FeeSelector, token hezCommon.Token, nonce int) (APITx, error) {
+
+	f40Amount, err := AmountToFloat40(amount)
+	if err != nil {
+		return APITx{}, err
+	}
+
+	tx := &hezCommon.PoolL2Tx{
+		FromIdx:   hezCommon.Idx(fromIdx),
+		ToEthAddr: ethCommon.HexToAddress(toEthAddress),
+		ToBJJ:     hezCommon.EmptyBJJComp,
+		ToIdx:     0,
+		Amount:    f40Amount,
+		Fee:       hezCommon.FeeSelector(uint8(feeSelector)),
+		TokenID:   hezCommon.TokenID(token.TokenID),
+		Nonce:     hezCommon.Nonce(nonce),
+		Type:      hezCommon.TxTypeTransferToEthAddr,
+	}
+
+	return SignAPITx(chainID, fromBjjWallet, token, tx)
+}
+
+func SignAPITx(chainID int, fromBjjWallet account.BJJWallet, token hezCommon.Token, tx *hezCommon.PoolL2Tx) (APITx, error) {
+	tx, err := hezCommon.NewPoolL2Tx(tx)
+	if err != nil {
+		return APITx{}, err
+	}
+
+	txHash, err := tx.HashToSign(uint16(chainID))
+	if err != nil {
+		return APITx{}, err
+	}
+
+	signedTx := fromBjjWallet.PrivateKey.SignPoseidon(txHash)
+	tx.Signature = signedTx.Compress()
+
+	t := hezCommon.Token{
+		TokenID: hezCommon.TokenID(token.TokenID),
+		Symbol:  token.Symbol,
+	}
+
+	apiTxRequest := NewHermezAPITxRequest(tx, t)
+
+	return apiTxRequest, nil
+}
+
 // IdxToHez convert idx to hez idx
-func IdxToHez(idx hezcommon.Idx, tokenSymbol string) string {
+func IdxToHez(idx hezCommon.Idx, tokenSymbol string) string {
 	// log.Printf("idx %+v\ntoken: %s\n", idx, tokenSymbol)
 	return "hez:" + tokenSymbol + ":" + strconv.Itoa(int(idx))
+}
+
+func HezToIdx(hezIdx string) (int64, error) {
+	hezIdxSlice := strings.Split(hezIdx, ":")
+
+	if len(hezIdxSlice) == 3 {
+		if idx, err := strconv.ParseInt(hezIdxSlice[2], 10, 64); err == nil {
+			return idx, nil
+		}
+	}
+
+	return 0, errors.New("invalid hezIdx")
+}
+
+func AmountToFloat40(amount *big.Int) (*big.Int, error) {
+
+	amountfloat40, err := hezCommon.NewFloat40Floor(amount)
+	if err != nil {
+		return nil, err
+	}
+
+	f40Amount, err := amountfloat40.BigInt()
+	if err != nil {
+		return nil, err
+	}
+
+	return f40Amount, nil
 }
 
 // EthAddrToHez convert eth address to hez address
@@ -74,16 +149,16 @@ func MarshalTransaction(itemToTransfer string,
 	feeSelector int,
 	ethereumChainID int) (apiTxRequest APITx, err error) {
 
-	var token hezcommon.Token
-	var nonce hezcommon.Nonce
-	var fromIdx, toIdx hezcommon.Idx
+	var token hezCommon.Token
+	var nonce hezCommon.Nonce
+	var fromIdx, toIdx hezCommon.Idx
 
 	// Get from innerAccount Token and nonce details from sender innerAccount
 	for _, innerAccount := range senderAcctDetails.Accounts {
 		if strings.ToUpper(innerAccount.Token.Symbol) == itemToTransfer {
-			token.TokenID = hezcommon.TokenID(innerAccount.Token.ID)
+			token.TokenID = hezCommon.TokenID(innerAccount.Token.ID)
 			token.Symbol = innerAccount.Token.Symbol
-			nonce = hezcommon.Nonce(innerAccount.Nonce)
+			nonce = hezCommon.Nonce(innerAccount.Nonce)
 			tempAccountsIdx := strings.Split(innerAccount.AccountIndex, ":")
 			if len(tempAccountsIdx) == 3 {
 				tempAccIdx, errAtoi := strconv.Atoi(tempAccountsIdx[2])
@@ -91,7 +166,7 @@ func MarshalTransaction(itemToTransfer string,
 					err = fmt.Errorf("[MarshalTransaction] Error getting sender Account index. Account: %+v - Error: %s\n", innerAccount, err.Error())
 					return
 				}
-				fromIdx = hezcommon.Idx(tempAccIdx)
+				fromIdx = hezCommon.Idx(tempAccIdx)
 			}
 		}
 	}
@@ -106,7 +181,7 @@ func MarshalTransaction(itemToTransfer string,
 					log.Printf("[MarshalTransaction] Error getting receipient Account index. Account: %+v - Error: %s\n", innerAccount, err.Error())
 					return
 				}
-				toIdx = hezcommon.Idx(tempAccIdx)
+				toIdx = hezCommon.Idx(tempAccIdx)
 			}
 		}
 	}
@@ -126,24 +201,24 @@ func MarshalTransaction(itemToTransfer string,
 	}
 
 	// fee := hezcommon.FeeSelector(100)
-	fee := hezcommon.FeeSelector(uint8(feeSelector)) // 10.2%
+	fee := hezCommon.FeeSelector(uint8(feeSelector)) // 10.2%
 
-	tx := new(hezcommon.PoolL2Tx)
+	tx := new(hezCommon.PoolL2Tx)
 	tx.FromIdx = fromIdx
-	tx.ToEthAddr = hezcommon.EmptyAddr
-	tx.ToBJJ = hezcommon.EmptyBJJComp
+	tx.ToEthAddr = hezCommon.EmptyAddr
+	tx.ToBJJ = hezCommon.EmptyBJJComp
 	tx.ToIdx = toIdx
 	tx.Amount = amount
 	tx.Fee = fee
 	tx.TokenID = token.TokenID
 	tx.Nonce = nonce
-	tx.Type = hezcommon.TxTypeTransfer
+	tx.Type = hezCommon.TxTypeTransfer
 
 	// log.Println("")
 	// log.Println("[MarshalTransaction] hezcommon.PoolL2Tx")
 	// log.Printf("%+v\n\n", tx)
 
-	tx, err = hezcommon.NewPoolL2Tx(tx)
+	tx, err = hezCommon.NewPoolL2Tx(tx)
 	if err != nil {
 		err = fmt.Errorf("[MarshalTransaction] Error creating L2 TX Pool object. TX: %+v - Error: %s\n", tx, err.Error())
 		return
