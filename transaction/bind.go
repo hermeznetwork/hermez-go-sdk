@@ -69,16 +69,24 @@ func NewSignedAPITxToEthAddr(chainID int, fromBjjWallet account.BJJWallet, fromI
 }
 
 func SignAPITx(chainID int, fromBjjWallet account.BJJWallet, token hezCommon.Token, tx *hezCommon.PoolL2Tx) (APITx, error) {
+
+	// log.Println("")
+	// log.Println("[MarshalTransaction] hezcommon.PoolL2Tx")
+	// log.Printf("%+v\n\n", tx)
 	tx, err := hezCommon.NewPoolL2Tx(tx)
 	if err != nil {
 		return APITx{}, err
 	}
 
+	// log.Println("[MarshalTransaction] after hezcommon.NewPoolL2Tx")
+	// log.Printf("%+v\n\n", tx)
 	txHash, err := tx.HashToSign(uint16(chainID))
 	if err != nil {
 		return APITx{}, err
 	}
 
+	// log.Println("[MarshalTransaction] tx signed")
+	// log.Printf("%+v\n\n", tx)
 	signedTx := fromBjjWallet.PrivateKey.SignPoseidon(txHash)
 	tx.Signature = signedTx.Compress()
 
@@ -89,6 +97,8 @@ func SignAPITx(chainID int, fromBjjWallet account.BJJWallet, token hezCommon.Tok
 
 	apiTxRequest := NewHermezAPITxRequest(tx, t)
 
+	// log.Println("[MarshalTransaction] apiTxRequest")
+	// log.Printf("%+v\n\n", apiTxRequest)
 	return apiTxRequest, nil
 }
 
@@ -215,34 +225,7 @@ func MarshalTransaction(itemToTransfer string,
 	tx.Nonce = nonce
 	tx.Type = hezCommon.TxTypeTransfer
 
-	// log.Println("")
-	// log.Println("[MarshalTransaction] hezcommon.PoolL2Tx")
-	// log.Printf("%+v\n\n", tx)
+	apiTxRequest, err = SignAPITx(ethereumChainID, senderBjjWallet, token, tx)
 
-	tx, err = hezCommon.NewPoolL2Tx(tx)
-	if err != nil {
-		err = fmt.Errorf("[MarshalTransaction] Error creating L2 TX Pool object. TX: %+v - Error: %s\n", tx, err.Error())
-		return
-	}
-
-	// log.Println("[MarshalTransaction] after hezcommon.NewPoolL2Tx")
-	// log.Printf("%+v\n\n", tx)
-
-	txHash, err := tx.HashToSign(uint16(ethereumChainID))
-	if err != nil {
-		err = fmt.Errorf("[MarshalTransaction] Error generating tx hash. TX: %+v - Error: %s\n", tx, err.Error())
-		return
-	}
-
-	signedTx := senderBjjWallet.PrivateKey.SignPoseidon(txHash)
-	tx.Signature = signedTx.Compress()
-
-	// log.Println("[MarshalTransaction] tx signed")
-	// log.Printf("%+v\n\n", tx)
-
-	apiTxRequest = NewHermezAPITxRequest(tx, token)
-
-	// log.Println("[MarshalTransaction] apiTxRequest")
-	// log.Printf("%+v\n\n", apiTxRequest)
 	return
 }
