@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	ethereumNodeURL = ""
-	chainID         = 5 // set this accordingly to the ethereum node
-
-	sourceAccPvtKey           = ""
+	ethereumNodeURL           = ""
+	chainID                   = 5 // set this accordingly to the ethereum node
 	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
+
+	sourceAccPvtKey = ""
 
 	txsReceiverMetadataJson = `
 	[
@@ -90,14 +90,16 @@ func main() {
 	}
 
 	log.Println("Getting sender idx and nonce...")
-	idx := int64(-1)
-	nonce := -1
+	var idx uint64
+	var nonce int
 	for _, acc := range payerAccInfo.Accounts {
 		if acc.Token.Symbol == hezToken.Symbol {
-			if idx, err = transaction.HezToIdx(acc.AccountIndex); err != nil {
+			var strHezIdx hezCommon.StrHezIdx
+			if err = strHezIdx.UnmarshalText([]byte(acc.AccountIndex)); err != nil {
 				log.Printf("Error parsing account idx. Account Index: %s - Error: %s\n", acc.AccountIndex, err.Error())
 				return
 			}
+			idx = uint64(strHezIdx.Idx)
 			nonce = acc.Nonce
 			break
 		}

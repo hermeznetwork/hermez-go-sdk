@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"log"
 	"math/big"
@@ -46,7 +45,7 @@ func NewHermezAPITxRequest(poolTx *hezCommon.PoolL2Tx, token hezCommon.Token) AP
 }
 
 // NewSignedAPITxToEthAddr creates and signs a new APITx to transfer to eth addr
-func NewSignedAPITxToEthAddr(chainID int, fromBjjWallet account.BJJWallet, fromIdx int64, toEthAddress string, amount *big.Int, feeSelector hezCommon.FeeSelector, token hezCommon.Token, nonce int) (APITx, error) {
+func NewSignedAPITxToEthAddr(chainID int, fromBjjWallet account.BJJWallet, fromIdx uint64, toEthAddress string, amount *big.Int, feeSelector hezCommon.FeeSelector, token hezCommon.Token, nonce int) (APITx, error) {
 
 	f40Amount, err := AmountToFloat40(amount)
 	if err != nil {
@@ -106,18 +105,6 @@ func SignAPITx(chainID int, fromBjjWallet account.BJJWallet, token hezCommon.Tok
 func IdxToHez(idx hezCommon.Idx, tokenSymbol string) string {
 	// log.Printf("idx %+v\ntoken: %s\n", idx, tokenSymbol)
 	return "hez:" + tokenSymbol + ":" + strconv.Itoa(int(idx))
-}
-
-func HezToIdx(hezIdx string) (int64, error) {
-	hezIdxSlice := strings.Split(hezIdx, ":")
-
-	if len(hezIdxSlice) == 3 {
-		if idx, err := strconv.ParseInt(hezIdxSlice[2], 10, 64); err == nil {
-			return idx, nil
-		}
-	}
-
-	return 0, errors.New("invalid hezIdx")
 }
 
 func AmountToFloat40(amount *big.Int) (*big.Int, error) {
