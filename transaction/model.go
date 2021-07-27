@@ -59,3 +59,9 @@ type PoolTxAPI struct {
 type TransactionsAPIResponse struct {
 	Transactions []PoolTxAPI `json:"transactions"`
 }
+
+type TxReceiverMetadata struct {
+	ToEthAddr   string `json:"to_eth_addr"`
+	FeeSelector uint   `json:"fee_selector"`
+	Amount      string `json:"amount"`
+}

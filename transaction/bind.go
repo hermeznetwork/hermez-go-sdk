@@ -45,7 +45,8 @@ func NewHermezAPITxRequest(poolTx *hezCommon.PoolL2Tx, token hezCommon.Token) AP
 	}
 }
 
-func NewSignedAPITxFromEthAddr(chainID int, fromBjjWallet account.BJJWallet, fromIdx int64, toEthAddress string, amount *big.Int, feeSelector hezCommon.FeeSelector, token hezCommon.Token, nonce int) (APITx, error) {
+// NewSignedAPITxToEthAddr creates and signs a new APITx to transfer to eth addr
+func NewSignedAPITxToEthAddr(chainID int, fromBjjWallet account.BJJWallet, fromIdx int64, toEthAddress string, amount *big.Int, feeSelector hezCommon.FeeSelector, token hezCommon.Token, nonce int) (APITx, error) {
 
 	f40Amount, err := AmountToFloat40(amount)
 	if err != nil {

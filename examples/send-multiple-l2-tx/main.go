@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"math/big"
 
@@ -17,6 +18,14 @@ const (
 
 	sourceAccPvtKey           = ""
 	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
+
+	txsReceiverMetadataJson = `
+	[
+		{ "to_eth_addr": "0xb48cA794d49EeC406A5dD2c547717e37b5952a83", "fee_selector": 126, "amount": "1100000000000000000" },
+		{ "to_eth_addr": "0x263C3Ab7E4832eDF623fBdD66ACee71c028Ff591", "fee_selector": 126, "amount": "1200000000000000000" },
+		{ "to_eth_addr": "0xb8eD2B0a6e17649c9cE891895D3D9297Ab448f03", "fee_selector": 126, "amount": "1300000000000000000" },
+		{ "to_eth_addr": "0x4E857Ac4A07cAD0B50CD006158f5E5A521A880CE", "fee_selector": 126, "amount": "1400000000000000000" }
+	]`
 )
 
 var (
@@ -24,23 +33,10 @@ var (
 		TokenID: 1,
 		Symbol:  "HEZ",
 	}
-	txsMetadata = []txMetadata{
-		{"0xb48cA794d49EeC406A5dD2c547717e37b5952a83", 126, big.NewInt(1100000000000000000)},
-		{"0x263C3Ab7E4832eDF623fBdD66ACee71c028Ff591", 126, big.NewInt(1200000000000000000)},
-		{"0xb8eD2B0a6e17649c9cE891895D3D9297Ab448f03", 126, big.NewInt(1300000000000000000)},
-		{"0x4E857Ac4A07cAD0B50CD006158f5E5A521A880CE", 126, big.NewInt(1400000000000000000)},
-	}
 )
 
-type txMetadata struct {
-	EthAddr string
-	Fee     uint
-	Amount  *big.Int
-}
-
 func main() {
-	var debug bool
-	debug = false
+	var debug bool = false
 
 	log.Println("Starting Hermez Client...")
 	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex, chainID)
@@ -108,16 +104,29 @@ func main() {
 	}
 	log.Printf("Nonce is: %+v\n", nonce)
 
-	for _, txMetadata := range txsMetadata {
-		apiTx, err := transaction.NewSignedAPITxFromEthAddr(chainID, bjjWallet, idx, txMetadata.EthAddr, txMetadata.Amount, hezCommon.FeeSelector(txMetadata.Fee), hezToken, nonce)
+	var txsMd []transaction.TxReceiverMetadata
+	if err := json.Unmarshal([]byte(txsReceiverMetadataJson), &txsMd); err != nil {
+		log.Printf("Error parsing txs receiver meta data. Error: %s\n", err.Error())
+		return
+	}
+
+	for _, txMd := range txsMd {
+
+		amount, ok := big.NewInt(0).SetString(txMd.Amount, 10)
+		if !ok {
+			log.Printf("Error parsing tx receiver metadata amount: %s - Error: %s\n", txMd.Amount, err.Error())
+			return
+		}
+
+		apiTx, err := transaction.NewSignedAPITxToEthAddr(chainID, bjjWallet, idx, txMd.ToEthAddr, amount, hezCommon.FeeSelector(txMd.FeeSelector), hezToken, nonce)
 		if err != nil {
-			log.Printf("Error creating tx to Eth Address: %s - Error: %s\n", txMetadata.EthAddr, err.Error())
+			log.Printf("Error creating tx to Eth Address: %s - Error: %s\n", txMd.ToEthAddr, err.Error())
 			return
 		}
 
 		apiTx, response, err := transaction.ExecuteL2Transaction(hezClient, apiTx)
 		if err != nil {
-			log.Printf("Error executing tx to Eth Address: %s - Error: %s\n", txMetadata.EthAddr, err.Error())
+			log.Printf("Error executing tx to Eth Address: %s - Error: %s\n", txMd.ToEthAddr, err.Error())
 			return
 		}
 
