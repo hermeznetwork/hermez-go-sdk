@@ -7,39 +7,47 @@ import (
 
 	"github.com/hermeznetwork/hermez-go-sdk/account"
 	"github.com/hermeznetwork/hermez-go-sdk/client"
+	sdkcommon "github.com/hermeznetwork/hermez-go-sdk/common"
 	"github.com/hermeznetwork/hermez-go-sdk/node"
 	"github.com/hermeznetwork/hermez-go-sdk/transaction"
-	hezCommon "github.com/hermeznetwork/hermez-node/common"
+	hezcommon "github.com/hermeznetwork/hermez-node/common"
 )
 
 const (
-	ethereumNodeURL           = ""
-	chainID                   = 5 // set this accordingly to the ethereum node
-	auctionContractAddressHex = "0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20"
-
+	ethereumNodeURL = "https://goerli.infura.io/v3/"
 	sourceAccPvtKey = ""
+
+	// txsReceiverMetadataJson = `
+	// [
+	// 	{ "to_eth_addr": "0xb48cA794d49EeC406A5dD2c547717e37b5952a83", "fee_selector": 126, "amount": "1100000000000000000" },
+	// 	{ "to_eth_addr": "0x263C3Ab7E4832eDF623fBdD66ACee71c028Ff591", "fee_selector": 126, "amount": "1200000000000000000" },
+	// 	{ "to_eth_addr": "0xb8eD2B0a6e17649c9cE891895D3D9297Ab448f03", "fee_selector": 126, "amount": "1300000000000000000" },
+	// 	{ "to_eth_addr": "0x4E857Ac4A07cAD0B50CD006158f5E5A521A880CE", "fee_selector": 126, "amount": "1400000000000000000" }
+	// ]`
 
 	txsReceiverMetadataJson = `
 	[
-		{ "to_eth_addr": "0xb48cA794d49EeC406A5dD2c547717e37b5952a83", "fee_selector": 126, "amount": "1100000000000000000" },
-		{ "to_eth_addr": "0x263C3Ab7E4832eDF623fBdD66ACee71c028Ff591", "fee_selector": 126, "amount": "1200000000000000000" },
-		{ "to_eth_addr": "0xb8eD2B0a6e17649c9cE891895D3D9297Ab448f03", "fee_selector": 126, "amount": "1300000000000000000" },
-		{ "to_eth_addr": "0x4E857Ac4A07cAD0B50CD006158f5E5A521A880CE", "fee_selector": 126, "amount": "1400000000000000000" }
+		{ "to_eth_addr": "0xb48cA794d49EeC406A5dD2c547717e37b5952a83", "fee_selector": 126, "amount": "900000000000000000" },
+		{ "to_eth_addr": "0x263C3Ab7E4832eDF623fBdD66ACee71c028Ff591", "fee_selector": 126, "amount": "8500000000000000000" }
 	]`
+	debug   = false
+	network = "goerli"
 )
 
-var (
-	hezToken = hezCommon.Token{
-		TokenID: 1,
-		Symbol:  "HEZ",
-	}
-)
+var hezToken = hezcommon.Token{
+	TokenID: 1,
+	Symbol:  "HEZ",
+}
 
 func main() {
-	var debug bool = false
+	networkDefinition, err := sdkcommon.GetNetworkDefinition(network)
+	if err != nil {
+		log.Printf("Error getting hermez definition at %s . Error: %s\n", network, err.Error())
+		return
+	}
 
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient(ethereumNodeURL, auctionContractAddressHex, chainID)
+	hezClient, err := client.NewHermezClient(ethereumNodeURL, networkDefinition.RollupContractAddress.Hex(), networkDefinition.ChainID)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return
@@ -94,7 +102,7 @@ func main() {
 	var nonce int
 	for _, acc := range payerAccInfo.Accounts {
 		if acc.Token.Symbol == hezToken.Symbol {
-			var strHezIdx hezCommon.StrHezIdx
+			var strHezIdx hezcommon.StrHezIdx
 			if err = strHezIdx.UnmarshalText([]byte(acc.AccountIndex)); err != nil {
 				log.Printf("Error parsing account idx. Account Index: %s - Error: %s\n", acc.AccountIndex, err.Error())
 				return
@@ -120,7 +128,7 @@ func main() {
 			return
 		}
 
-		apiTx, err := transaction.NewSignedAPITxToEthAddr(chainID, bjjWallet, idx, txMd.ToEthAddr, amount, hezCommon.FeeSelector(txMd.FeeSelector), hezToken, nonce)
+		apiTx, err := transaction.NewSignedAPITxToEthAddr(networkDefinition.ChainID, bjjWallet, idx, txMd.ToEthAddr, amount, hezcommon.FeeSelector(txMd.FeeSelector), hezToken, nonce)
 		if err != nil {
 			log.Printf("Error creating tx to Eth Address: %s - Error: %s\n", txMd.ToEthAddr, err.Error())
 			return
