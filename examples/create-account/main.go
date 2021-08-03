@@ -17,18 +17,18 @@ import (
 
 const (
 	ethereumNodeURL = "https://goerli.infura.io/v3/"
-	sourceAccPvtKey = "3030303454656e686f333242697473566f6365506f6465416372656469746172"
+	sourceAccPvtKey = ""
 	network         = "goerli"
 	debug           = false
 )
 
 func main() {
-	log.Println("Starting Hermez Client...")
 	networkDefinition, err := sdkcommon.GetNetworkDefinition(network)
 	if err != nil {
 		log.Printf("Error getting hermez definition at %s . Error: %s\n", network, err.Error())
 		return
 	}
+	log.Println("Starting Hermez Client...")
 	hezClient, err := client.NewHermezClient(ethereumNodeURL, networkDefinition.AuctionContractAddress.Hex(), networkDefinition.ChainID)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
