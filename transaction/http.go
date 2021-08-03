@@ -75,8 +75,7 @@ func SendAtomicTxsGroup(hezClient client.HermezClient, atomicTxs hezCommon.Atomi
 	log.Println("Bytes sent: ", apiTxBody)
 
 	var URL string
-	// URL = hezClient.CurrentCoordinatorURL + "/v1/atomic-pool"
-	URL = "https://marcelonode.xyz/v1/atomic-pool"
+	URL = hezClient.CurrentCoordinatorURL + "/v1/atomic-pool"
 	request, err := http.NewRequest("POST", URL, apiTxBody)
 	if err != nil {
 		err = fmt.Errorf("[SendAtomicTxsGroup] Error creating HTTP request. URL: %s - request: %+v - Error: %s\n", URL, apiTxBody, err.Error())
