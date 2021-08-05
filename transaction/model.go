@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/hermeznetwork/hermez-go-sdk/token"
-	"github.com/hermeznetwork/hermez-node/api/apitypes"
 	hezcommon "github.com/hermeznetwork/hermez-node/common"
+	"github.com/hermeznetwork/hermez-node/common/apitypes"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 )
 
