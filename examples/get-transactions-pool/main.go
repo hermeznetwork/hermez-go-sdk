@@ -39,12 +39,14 @@ func main() {
 	hezClient.SetCurrentCoordinator(bootCoordNodeState.Network.NextForgers[0].Coordinator.URL)
 	log.Println("Current client is set.")
 
+	log.Println("Getting data from the pool ...")
 	apiResponseTxs, err := transaction.GetTransactionsInPool(hezClient)
 	if err != nil {
 		log.Printf("Error obtaining transactions info. URL: %s - Error: %s\n", hezClient.BootCoordinatorURL, err.Error())
 		return
 	}
 
+	log.Println("Request finished. Total transactions in the pool: ", len(apiResponseTxs.Transactions))
 	for _, tx := range apiResponseTxs.Transactions {
 		log.Printf("%+v\n", tx)
 	}
