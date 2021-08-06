@@ -28,7 +28,9 @@ const (
 	txsReceiverMetadataJson = `
 	[
 		{ "to_eth_addr": "0xb48cA794d49EeC406A5dD2c547717e37b5952a83", "fee_selector": 126, "amount": "900000000000000000" },
+		{ "to_eth_addr": "0x715ea08DAE7dCD40E98379D11af237b587BC2f77", "fee_selector": 126, "amount": "8400000000000000000" },
 		{ "to_eth_addr": "0x263C3Ab7E4832eDF623fBdD66ACee71c028Ff591", "fee_selector": 126, "amount": "8500000000000000000" }
+		
 	]`
 	debug   = false
 	network = "goerli"
@@ -47,7 +49,7 @@ func main() {
 	}
 
 	log.Println("Starting Hermez Client...")
-	hezClient, err := client.NewHermezClient(ethereumNodeURL, networkDefinition.RollupContractAddress.Hex(), networkDefinition.ChainID)
+	hezClient, err := client.NewHermezClient(ethereumNodeURL, networkDefinition.AuctionContractAddress.Hex(), networkDefinition.ChainID)
 	if err != nil {
 		log.Printf("Error during Hermez client initialization: %s\n", err.Error())
 		return

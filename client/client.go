@@ -3,11 +3,13 @@ package client
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dghubble/sling"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	sdkcommon "github.com/hermeznetwork/hermez-go-sdk/common"
 
 	HermezAuctionProtocol "github.com/hermeznetwork/hermez-node/eth/contracts/auction"
 )
@@ -17,6 +19,17 @@ const (
 	defaultIdleConnTimeout = 2 * time.Second
 	defaultTimeoutCall     = 2 * time.Minute
 )
+
+func NewHermezClientFromEnv() (HermezClient, error) {
+	nodeURL := os.Getenv("ETH_NODE_URL")
+	network := os.Getenv("ETH_NETWORK")
+	networkDefinition, err := sdkcommon.GetNetworkDefinition(network)
+	if err != nil {
+		log.Printf("Error getting hermez definition at %s . Error: %s\n", network, err.Error())
+		return HermezClient{}, err
+	}
+	return NewHermezClient(nodeURL, networkDefinition.AuctionContractAddress.Hex(), networkDefinition.ChainID)
+}
 
 func NewHermezClient(nodeURL string, auctionContractAddressHex string, ethereumChainID int) (hezClient HermezClient, err error) {
 	ethClient, err := getCustomEthereumClient(nodeURL)
@@ -31,6 +44,7 @@ func NewHermezClient(nodeURL string, auctionContractAddressHex string, ethereumC
 		log.Printf("Error during Auction smart contract wrapper initialization: %s\n", err.Error())
 		return
 	}
+
 	hezClient.AuctionContract = auctionContract
 	bootCoordURL, err := hezClient.AuctionContract.BootCoordinatorURL(nil)
 	if err != nil {
