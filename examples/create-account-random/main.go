@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	ethereumNodeURL = "https://goerli.infura.io/v3/b5b4d5a4220049919ba4765671bad405"
+	ethereumNodeURL = "https://goerli.infura.io/v3/"
 	network         = "goerli"
 	debug           = false
 )
