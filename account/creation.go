@@ -108,6 +108,11 @@ func CreateBjjWalletWithAccCreationSignatureFromHexPvtKey(hexPvtKey string, chai
 		log.Printf("[CreateBjjWalletFromHexPvtKey] Error when creating private key: %s\n", err.Error())
 		return
 	}
+	return CreateBjjWalletWithAccCreationSignatureFromPvtKey(ecdsaPvtKey, chainID, rollupContractAddress)
+}
+
+// CreateBjjWalletWithAccCreationSignatureFromPvtKey Create a Babyjubjub Wallet from Hexdecimal Private Key with hermez account creation signature
+func CreateBjjWalletWithAccCreationSignatureFromPvtKey(ecdsaPvtKey *ecdsa.PrivateKey, chainID int, rollupContractAddress string) (bjjWallet BJJWallet, ethAccount accounts.Account, err error) {
 	ecdsaPubKey := ecdsaPvtKey.Public().(*ecdsa.PublicKey)
 	ethAccount.Address = crypto.PubkeyToAddress(*ecdsaPubKey)
 
