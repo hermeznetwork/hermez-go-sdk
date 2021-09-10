@@ -14,6 +14,7 @@ import (
 	"github.com/hermeznetwork/hermez-go-sdk/util"
 
 	hezCommon "github.com/hermeznetwork/hermez-node/common"
+	"github.com/hermeznetwork/hermez-node/common/apitypes"
 )
 
 // ExecuteL2Transaction submits L2 transaction to the current coordinator endpoint
@@ -144,7 +145,7 @@ func GetTransactionsInPool(hezClient client.HermezClient) (transactions Transact
 }
 
 // GetTransactionInPool connects to the hezClient.CurrentCoordinatorURL and pull a single transaction from the pool based on it's ID
-func GetTransactionPool(hezClient client.HermezClient, txID hezCommon.TxID) (transaction hezCommon.PoolL2Tx, err error) {
+func GetTransactionPool(hezClient client.HermezClient, txID hezCommon.TxID) (transaction apitypes.TxL2, err error) {
 	URL := hezClient.CurrentCoordinatorURL + "/v1/transactions-pool/" + txID.String()
 	request, err := http.NewRequest("GET", URL, nil)
 	if err != nil {
