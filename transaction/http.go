@@ -144,28 +144,36 @@ func GetTransactionsInPool(hezClient client.HermezClient) (transactions Transact
 
 // GetTransactionInPool connects to a hermez node and pull a single transaction from the pool based on it's ID
 func GetTransactionPool(hezClient client.HermezClient, txID hezCommon.TxID) (transaction hezCommon.PoolL2Tx, err error) {
-	if len(hezClient.BootCoordinatorURL) < 10 {
-		err = fmt.Errorf("[Transaction][GetTransactionsInPool] Boot Coordinator is not set : %s", hezClient.BootCoordinatorURL)
-		return
-	}
-	url := "/v1/transactions-pool/" + txID.String()
-	log.Println(url)
-	req, err := hezClient.BootCoordinatorClient.New().Get(url).Request()
-	log.Println(req.RequestURI)
+	URL := hezClient.CurrentCoordinatorURL + "/v1/transactions-pool/" + txID.String()
+	request, err := http.NewRequest("GET", URL, nil)
 	if err != nil {
-		log.Printf("[Transaction][GetTransactionsInPool] Error pulling transactions info from request: %s\n", err.Error())
+		err = fmt.Errorf("[GetTransactionPool] Error creating HTTP request. URL: %s - Error: %s\n", URL, err.Error())
 		return
 	}
-	var failureBody interface{}
-	res, err := hezClient.BootCoordinatorClient.Do(req, &transaction, &failureBody)
+	response, err := hezClient.HttpClient.Do(request)
 	if err != nil {
-		log.Printf("[Transaction][GetTransactionsInPool] Error pulling transactions info from hermez node: %s - Error: %s\n", hezClient.BootCoordinatorURL, err.Error())
+		err = fmt.Errorf("[GetTransactionPool] Error submitting HTTP request tx. URL: %s - Error: %s\n", URL, err.Error())
 		return
 	}
-	if res.StatusCode != http.StatusOK {
-		log.Printf("[Transaction][GetTransactionsInPool] HTTP Error pulling transactions info from hermez node: %+v - Error: %d\n", failureBody, res.StatusCode)
-		err = fmt.Errorf("HTTP status code sould be 200, but it's %d", res.StatusCode)
+	defer response.Body.Close()
+
+	if response.StatusCode < 200 || response.StatusCode > 299 {
+		tempBuf, errResp := io.ReadAll(response.Body)
+		if errResp != nil {
+			err = fmt.Errorf("[GetTransactionPool] Error unmarshaling tx: %+v - Error: %s\n", transaction, errResp.Error())
+			return
+		}
+		strJSONRequest := string(tempBuf)
+		err = fmt.Errorf("[GetTransactionPool] Error posting TX: %+v\nStatusCode:%d \nStatus: %s\nReturned Message: %s\nURL: %s \nRequest: %+v \nResponse: %+v\n",
+			transaction, response.StatusCode, response.Status, strJSONRequest, URL, request, response)
 		return
 	}
+
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		err = fmt.Errorf("[GetTransactionPool] Error reading HTTP return from Coordinator. URL: %s - Error: %s\n", URL, err.Error())
+		return
+	}
+	err = fmt.Errorf("Response is %d instead of 200. Body response: %s", response.StatusCode, b)
 	return
 }
