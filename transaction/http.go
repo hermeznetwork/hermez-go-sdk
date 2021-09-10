@@ -143,7 +143,7 @@ func GetTransactionsInPool(hezClient client.HermezClient) (transactions Transact
 }
 
 // GetTransactionInPool connects to a hermez node and pull a single transaction from the pool based on it's ID
-func GetTransactionsPool(hezClient client.HermezClient, txID hezCommon.TxID) (transaction hezCommon.PoolL2Tx, err error) {
+func GetTransactionPool(hezClient client.HermezClient, txID hezCommon.TxID) (transaction hezCommon.PoolL2Tx, err error) {
 	if len(hezClient.BootCoordinatorURL) < 10 {
 		err = fmt.Errorf("[Transaction][GetTransactionsInPool] Boot Coordinator is not set : %s", hezClient.BootCoordinatorURL)
 		return
