@@ -151,6 +151,7 @@ func GetTransactionPool(hezClient client.HermezClient, txID hezCommon.TxID) (tra
 	url := "/v1/transactions-pool/" + txID.String()
 	log.Println(url)
 	req, err := hezClient.BootCoordinatorClient.New().Get(url).Request()
+	log.Println(req.RequestURI)
 	if err != nil {
 		log.Printf("[Transaction][GetTransactionsInPool] Error pulling transactions info from request: %s\n", err.Error())
 		return
