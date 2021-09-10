@@ -141,3 +141,27 @@ func GetTransactionsInPool(hezClient client.HermezClient) (transactions Transact
 	}
 	return
 }
+
+func GetTransactionsPool(hezClient client.HermezClient, txID hezCommon.TxID) (transaction hezCommon.PoolL2Tx, err error) {
+	if len(hezClient.BootCoordinatorURL) < 10 {
+		err = fmt.Errorf("[Transaction][GetTransactionsInPool] Boot Coordinator is not set : %s", hezClient.BootCoordinatorURL)
+		return
+	}
+	url := "/v1/transactions-pool/" + txID.String()
+	req, err := hezClient.BootCoordinatorClient.New().Get(url).Request()
+	if err != nil {
+		log.Printf("[Transaction][GetTransactionsInPool] Error pulling transactions info from request: %s\n", err.Error())
+		return
+	}
+	var failureBody interface{}
+	res, err := hezClient.BootCoordinatorClient.Do(req, &transaction, &failureBody)
+	if err != nil {
+		log.Printf("[Transaction][GetTransactionsInPool] Error pulling transactions info from hermez node: %s - Error: %s\n", hezClient.BootCoordinatorURL, err.Error())
+		return
+	}
+	if res.StatusCode != http.StatusOK {
+		log.Printf("[Transaction][GetTransactionsInPool] HTTP Error pulling transactions info from hermez node: %+v - Error: %d\n", failureBody, res.StatusCode)
+		return
+	}
+	return
+}
