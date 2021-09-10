@@ -162,7 +162,7 @@ func GetTransactionPool(hezClient client.HermezClient, txID hezCommon.TxID) (tra
 		return
 	}
 	if res.StatusCode != http.StatusOK {
-		log.Printf("[Transaction][GetTransactionsInPool] HTTP Error pulling transactions info from hermez node: %+v - Error: %d\n", failureBody, res.StatusCode)
+		log.Printf("[Transaction][GetTransactionsInPool] HTTP Error pulling transactions info from hermez node: %s - Error: %d\n", failureBody, res.StatusCode)
 		err = fmt.Errorf("HTTP status code sould be 200, but it's %d", res.StatusCode)
 		return
 	}
