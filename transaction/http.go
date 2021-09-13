@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"errors"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -139,5 +140,41 @@ func GetTransactionsInPool(hezClient client.HermezClient) (transactions Transact
 		err = fmt.Errorf("[Transaction][GetTransactionsInPool] HTTP Error pulling transactions info from hermez node: %+v - Error: %d\n", failureBody, res.StatusCode))
 		return
 	}
+	return
+}
+
+// GetTransactionInPool connects to the hezClient.CurrentCoordinatorURL and pull a single transaction from the pool based on it's ID
+func GetTransactionPool(hezClient client.HermezClient, txID hezCommon.TxID) (transaction PoolTxAPI, err error) {
+	URL := hezClient.CurrentCoordinatorURL + "/v1/transactions-pool/" + txID.String()
+	request, err := http.NewRequest("GET", URL, nil)
+	if err != nil {
+		err = fmt.Errorf("[GetTransactionPool] Error creating HTTP request. URL: %s - Error: %s\n", URL, err.Error())
+		return
+	}
+	response, err := hezClient.HttpClient.Do(request)
+	if err != nil {
+		err = fmt.Errorf("[GetTransactionPool] Error submitting HTTP request tx. URL: %s - Error: %s\n", URL, err.Error())
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode < 200 || response.StatusCode > 299 {
+		tempBuf, errResp := io.ReadAll(response.Body)
+		if errResp != nil {
+			err = fmt.Errorf("[GetTransactionPool] Error unmarshaling error message: %+v - Error: %s\n", transaction, errResp.Error())
+			return
+		}
+		strJSONRequest := string(tempBuf)
+		err = fmt.Errorf("[GetTransactionPool] Error posting TX: %+v\nStatusCode:%d \nStatus: %s\nReturned Message: %s\nURL: %s \nRequest: %+v \nResponse: %+v\n",
+			transaction, response.StatusCode, response.Status, strJSONRequest, URL, request, response)
+		return
+	}
+
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		err = fmt.Errorf("[GetTransactionPool] Error reading HTTP return from Coordinator. URL: %s - Error: %s\n", URL, err.Error())
+		return
+	}
+	err = json.Unmarshal(b, &transaction)
 	return
 }
