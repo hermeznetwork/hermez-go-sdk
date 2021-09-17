@@ -31,8 +31,8 @@ func init() {
 
 	goerli := HermezDefinitionEthereumNetwork{}
 	goerli.ChainID = 5
-	goerli.RollupContractAddress = common.HexToAddress("0xf08a226B67a8A9f99cCfCF51c50867bc18a54F53")
-	goerli.AuctionContractAddress = common.HexToAddress("0x1D5c3Dd2003118743D596D7DB7EA07de6C90fB20")
+	goerli.RollupContractAddress = common.HexToAddress("0xe6E56C74630F8eE824039308794639D5a02BF9E5")
+	goerli.AuctionContractAddress = common.HexToAddress("0x748964F22eFd023eB78A246A7AC2506e84CC4545")
 	EthereumNetworks.Store("goerli", goerli)
 }
 
