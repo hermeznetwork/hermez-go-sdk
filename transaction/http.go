@@ -1,7 +1,6 @@
 package transaction
 
 import (
-	"errors"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -137,7 +136,7 @@ func GetTransactionsInPool(hezClient client.HermezClient) (transactions Transact
 	}
 	if res.StatusCode != http.StatusOK {
 		log.Printf("[Transaction][GetTransactionsInPool] HTTP Error pulling transactions info from hermez node: %+v - Error: %d\n", failureBody, res.StatusCode)
-		err = fmt.Errorf("[Transaction][GetTransactionsInPool] HTTP Error pulling transactions info from hermez node: %+v - Error: %d\n", failureBody, res.StatusCode))
+		err = fmt.Errorf("[Transaction][GetTransactionsInPool] HTTP Error pulling transactions info from hermez node: %+v - Error: %d\n", failureBody, res.StatusCode)
 		return
 	}
 	return
